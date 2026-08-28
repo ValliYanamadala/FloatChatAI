@@ -1,0 +1,3 @@
+TODO: Define a prompt that converts a validated intent into a structured QueryPlan for the supported MCP tools.
+
+The prompt should choose a controlled MCP tool name, provide validated tool arguments, and request an appropriate visualization. It must not produce raw SQL.

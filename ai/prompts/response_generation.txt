@@ -1,0 +1,3 @@
+TODO: Define a prompt that turns structured data results and visualization metadata into a concise, grounded explanation.
+
+The prompt should cite available metadata, surface caveats, and avoid inventing numerical values or unsupported ARGO details.

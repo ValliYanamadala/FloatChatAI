@@ -1,0 +1,3 @@
+TODO: Define a prompt that extracts a validated FloatChatAI intent from a user's natural-language ARGO question.
+
+The prompt should identify intent type, requested parameters, region or location, date range, depth or pressure range, float ID, and confidence. It must not produce SQL.

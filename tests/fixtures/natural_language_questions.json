@@ -1,0 +1,52 @@
+[
+  {
+    "id": "float_search_arabian_sea",
+    "question": "Show me ARGO floats in the Arabian Sea.",
+    "expected_intent": "float_search"
+  },
+  {
+    "id": "nearest_chennai",
+    "question": "Which ARGO floats are closest to Chennai?",
+    "expected_intent": "nearest_float"
+  },
+  {
+    "id": "salinity_profile_equator",
+    "question": "Show salinity profiles near the equator.",
+    "expected_intent": "profile_query"
+  },
+  {
+    "id": "trajectory_float",
+    "question": "Show the trajectory of float 2901234.",
+    "expected_intent": "trajectory"
+  },
+  {
+    "id": "temperature_six_months",
+    "question": "Show temperature changes over the last six months.",
+    "expected_intent": "time_series"
+  },
+  {
+    "id": "compare_salinity_regions",
+    "question": "Compare salinity in the Arabian Sea and Bay of Bengal.",
+    "expected_intent": "comparison"
+  },
+  {
+    "id": "average_temperature",
+    "question": "What is the average temperature?",
+    "expected_intent": "statistics"
+  },
+  {
+    "id": "float_parameters",
+    "question": "What parameters does float 2901234 measure?",
+    "expected_intent": "metadata"
+  },
+  {
+    "id": "oxygen_bay_of_bengal",
+    "question": "Plot dissolved oxygen observations in the Bay of Bengal for March 2023.",
+    "expected_intent": "time_series"
+  },
+  {
+    "id": "chlorophyll_depth",
+    "question": "Where is chlorophyll highest between 0 and 100 meters?",
+    "expected_intent": "statistics"
+  }
+]

@@ -25,6 +25,7 @@ Currently implemented:
 
 - Repository foundation and workstream folders.
 - AI contract schemas using Pydantic.
+- Provider-independent query-understanding service with deterministic mock LLM tests.
 - Placeholder prompts for future AI workflows.
 - Placeholder RAG structure and documentation.
 - Unit tests and evaluation-question fixtures for schema validation.

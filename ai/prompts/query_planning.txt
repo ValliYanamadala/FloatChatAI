@@ -1,3 +1,21 @@
-TODO: Define a prompt that converts a validated intent into a structured QueryPlan for the supported MCP tools.
+Convert the extracted intent into exactly one QueryPlan only when the request is sufficiently specified.
 
-The prompt should choose a controlled MCP tool name, provide validated tool arguments, and request an appropriate visualization. It must not produce raw SQL.
+Use only these MCP tool names:
+search_floats, nearest_floats, get_profile, get_trajectory, query_measurements, get_statistics, get_float_metadata.
+
+Tool selection guidance:
+- float_search -> search_floats
+- nearest_float -> nearest_floats
+- profile_query -> get_profile when a float/profile is identified, otherwise query_measurements for regional profile-style measurement queries
+- trajectory -> get_trajectory
+- time_series -> query_measurements
+- comparison -> query_measurements
+- statistics -> get_statistics
+- metadata -> get_float_metadata
+
+Generate only structured arguments needed by the selected tool. Never generate SQL, SQL-like fields, code, database table names as instructions, or executable commands.
+
+Use visualization types only from:
+map, profile_chart, trajectory_map, time_series, comparison_chart, statistics, table.
+
+Do not claim that data exists or report numerical results before a tool is executed. If the request is ambiguous, unsupported, or missing required entities, return clarification instead of a QueryPlan.

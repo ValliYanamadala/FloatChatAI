@@ -3,6 +3,7 @@
 from ai.schemas.contracts import (
     AIResponse,
     AIResponseError,
+    ClarificationRequirement,
     DateRange,
     DepthRange,
     Intent,
@@ -20,6 +21,7 @@ from ai.schemas.contracts import (
 __all__ = [
     "AIResponse",
     "AIResponseError",
+    "ClarificationRequirement",
     "DateRange",
     "DepthRange",
     "Intent",

@@ -144,6 +144,8 @@ class Intent(StrictModel):
     depth_range_m: DepthRange | None = None
     pressure_range_dbar: PressureRange | None = None
     float_id: FloatId | None = None
+    platform_number: FloatId | None = None
+    comparison_targets: list[NonEmptyString] = Field(default_factory=list)
     confidence: float | None = Field(default=None, ge=0, le=1)
     original_question: NonEmptyString | None = None
 
@@ -152,6 +154,14 @@ class Intent(StrictModel):
     def reject_duplicate_parameters(cls, value: list[OceanParameter]) -> list[OceanParameter]:
         if len(value) != len(set(value)):
             raise ValueError("parameters must not contain duplicates")
+        return value
+
+    @field_validator("comparison_targets")
+    @classmethod
+    def reject_duplicate_comparison_targets(cls, value: list[str]) -> list[str]:
+        normalized = [item.casefold() for item in value]
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("comparison_targets must not contain duplicates")
         return value
 
 
@@ -183,6 +193,7 @@ class QueryMetadata(StrictModel):
 
 SQL_KEY_PATTERN = re.compile(r"(^|_)(raw_)?sql($|_)|sql_query", re.IGNORECASE)
 SQL_TEXT_PATTERN = re.compile(r"\b(select|insert|update|delete|drop|alter|create|truncate)\b", re.IGNORECASE)
+PARAMETER_ARGUMENT_KEYS = {"parameter", "parameters", "variable", "variables"}
 
 
 def _reject_sql_like_content(value: Any, path: str = "arguments") -> None:
@@ -200,6 +211,28 @@ def _reject_sql_like_content(value: Any, path: str = "arguments") -> None:
         raise ValueError("QueryPlan must not contain raw SQL text")
 
 
+def _validate_parameter_argument(value: Any, path: str) -> None:
+    valid_parameters = {parameter.value for parameter in OceanParameter}
+
+    if isinstance(value, str):
+        if value not in valid_parameters:
+            raise ValueError(f"{path} contains unsupported ocean parameter: {value}")
+    elif isinstance(value, list):
+        if not value:
+            raise ValueError(f"{path} must not be empty")
+        for index, item in enumerate(value):
+            if not isinstance(item, str) or item not in valid_parameters:
+                raise ValueError(f"{path}[{index}] contains unsupported ocean parameter: {item}")
+    else:
+        raise ValueError(f"{path} must be a supported ocean parameter or list of parameters")
+
+
+def _validate_known_argument_shapes(arguments: dict[str, JsonValue]) -> None:
+    for key, value in arguments.items():
+        if key in PARAMETER_ARGUMENT_KEYS:
+            _validate_parameter_argument(value, f"arguments.{key}")
+
+
 class QueryPlan(StrictModel):
     """Structured request from the AI layer to the controlled MCP interface."""
 
@@ -209,9 +242,19 @@ class QueryPlan(StrictModel):
     metadata: QueryMetadata | None = None
 
     @model_validator(mode="after")
-    def reject_raw_sql(self) -> "QueryPlan":
+    def validate_arguments(self) -> "QueryPlan":
         _reject_sql_like_content(self.arguments)
+        _validate_known_argument_shapes(self.arguments)
         return self
+
+
+class ClarificationRequirement(StrictModel):
+    """Structured clarification request for underspecified or unsupported queries."""
+
+    reason: NonEmptyString
+    missing_fields: list[NonEmptyString] = Field(default_factory=list)
+    questions: list[NonEmptyString] = Field(min_length=1)
+    original_question: NonEmptyString | None = None
 
 
 class AIResponseError(StrictModel):
@@ -228,6 +271,7 @@ class AIResponse(StrictModel):
     answer: NonEmptyString | None = None
     intent: Intent | None = None
     query_plan: QueryPlan | None = None
+    clarification: ClarificationRequirement | None = None
     structured_data: JsonValue = None
     visualization: VisualizationSpec | None = None
     metadata: dict[str, JsonValue] = Field(default_factory=dict)

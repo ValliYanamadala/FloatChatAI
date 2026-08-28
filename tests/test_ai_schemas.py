@@ -125,6 +125,13 @@ class QueryPlanSchemaTests(unittest.TestCase):
                 arguments={"filter": "SELECT temperature FROM measurements"},
             )
 
+    def test_query_plan_rejects_unsupported_variable_argument(self) -> None:
+        with self.assertRaises(ValidationError):
+            QueryPlan(
+                tool=MCPToolName.QUERY_MEASUREMENTS,
+                arguments={"variables": ["temperature", "wave_height"]},
+            )
+
     def test_required_query_plan_fields(self) -> None:
         with self.assertRaises(ValidationError):
             QueryPlan(tool=MCPToolName.GET_STATISTICS)

@@ -26,8 +26,8 @@ Currently implemented:
 - Repository foundation and workstream folders.
 - AI contract schemas using Pydantic.
 - Provider-independent query-understanding service with deterministic mock LLM tests.
-- Placeholder prompts for future AI workflows.
-- Placeholder RAG structure and documentation.
+- Initial RAG knowledge layer with curated corpus, deterministic loader/chunker, embedding abstraction, ChromaDB/vector-store abstraction, retriever, context builder, and routing support.
+- Prompt files for query understanding and RAG-aware response generation.
 - Unit tests and evaluation-question fixtures for schema validation.
 
 Planned:
@@ -35,7 +35,6 @@ Planned:
 - React + TypeScript frontend.
 - FastAPI backend.
 - PostgreSQL + PostGIS database integration.
-- ChromaDB-backed RAG pipeline.
 - MCP server and MCP tools.
 - ARGO NetCDF ingestion and normalized database loading.
 - Chatbot, maps, charts, and scientific result explanations.
@@ -44,7 +43,7 @@ Future work:
 
 - Implement backend services, database models, and migrations.
 - Implement data ingestion from real ARGO sources.
-- Implement RAG ingestion, embeddings, vector storage, and retrieval.
+- Add production embedding providers and enrich the curated RAG corpus.
 - Implement LLM adapters, agent orchestration, and prompt evaluation.
 - Implement MCP tools for controlled data access.
 - Build frontend chat and visualization experiences.

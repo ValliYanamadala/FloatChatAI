@@ -1,0 +1,162 @@
+[
+  {
+    "id": "define_argo",
+    "question": "What is ARGO?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "argo",
+    "relevant_topic": "core_concepts",
+    "database_required": false
+  },
+  {
+    "id": "define_profile",
+    "question": "What is an ARGO profile?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "argo",
+    "relevant_topic": "core_concepts",
+    "database_required": false
+  },
+  {
+    "id": "define_trajectory",
+    "question": "How is a trajectory different from a profile?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "argo",
+    "relevant_topic": "core_concepts",
+    "database_required": false
+  },
+  {
+    "id": "psal_meaning",
+    "question": "What does salinity mean in this project?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": false
+  },
+  {
+    "id": "pressure_units",
+    "question": "What unit is pressure stored in?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": false
+  },
+  {
+    "id": "depth_pressure_difference",
+    "question": "Can I treat depth and pressure as identical?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": false
+  },
+  {
+    "id": "oxygen_units",
+    "question": "What are the units for dissolved oxygen?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": false
+  },
+  {
+    "id": "chlorophyll_meaning",
+    "question": "What does chlorophyll represent?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": false
+  },
+  {
+    "id": "nitrate_meaning",
+    "question": "What does nitrate measure?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": false
+  },
+  {
+    "id": "bgc_meaning",
+    "question": "What is BGC?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "argo",
+    "relevant_topic": "core_concepts",
+    "database_required": false
+  },
+  {
+    "id": "qc_meaning",
+    "question": "What does QC mean?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "data_quality",
+    "relevant_topic": "validation_rules",
+    "database_required": false
+  },
+  {
+    "id": "missing_values",
+    "question": "Should missing salinity be treated as zero?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "data_quality",
+    "relevant_topic": "validation_rules",
+    "database_required": false
+  },
+  {
+    "id": "valid_lat_lon",
+    "question": "What latitude and longitude ranges are valid?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "data_quality",
+    "relevant_topic": "validation_rules",
+    "database_required": false
+  },
+  {
+    "id": "schema_measurements",
+    "question": "What does the measurements table represent?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "schema",
+    "relevant_topic": "database_semantics",
+    "database_required": false
+  },
+  {
+    "id": "schema_profiles",
+    "question": "How are floats and profiles related?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "schema",
+    "relevant_topic": "database_semantics",
+    "database_required": false
+  },
+  {
+    "id": "near_me",
+    "question": "Can the system find floats near me without my coordinates?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "geography",
+    "relevant_topic": "ocean_terms",
+    "database_required": false
+  },
+  {
+    "id": "example_salinity_pressure",
+    "question": "How should a salinity query between 100 and 500 dbar be interpreted?",
+    "expected_rag_usefulness": "useful",
+    "expected_category": "examples",
+    "relevant_topic": "representative_queries",
+    "database_required": false
+  },
+  {
+    "id": "average_temperature",
+    "question": "What is the average temperature in the Arabian Sea?",
+    "expected_rag_usefulness": "not_primary",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": true
+  },
+  {
+    "id": "show_profiles",
+    "question": "Show salinity profiles near the equator.",
+    "expected_rag_usefulness": "not_primary",
+    "expected_category": "parameters",
+    "relevant_topic": "variable_mappings",
+    "database_required": true
+  },
+  {
+    "id": "nearest_chennai",
+    "question": "Which floats are closest to Chennai?",
+    "expected_rag_usefulness": "not_primary",
+    "expected_category": "geography",
+    "relevant_topic": "ocean_terms",
+    "database_required": true
+  }
+]

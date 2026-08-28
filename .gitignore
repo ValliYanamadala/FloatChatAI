@@ -41,6 +41,8 @@ coverage/
 
 # Docker/local runtime
 docker/.data/
+.chroma/
+.chroma*/
 *.log
 
 # Generated datasets and large local artifacts

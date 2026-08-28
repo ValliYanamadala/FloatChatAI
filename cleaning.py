@@ -34,7 +34,7 @@ def check_data(df):
     print(df.duplicated().sum())
 
 
-def validate_data(df):
+def validate_data(df, print_report=True):
     """Return a data validation report for an ARGO measurement table."""
 
     def invalid_count(condition):
@@ -108,10 +108,11 @@ def validate_data(df):
         else "FAIL"
     )
 
-    print("\n========== VALIDATION ==========")
+    if print_report:
+        print("\n========== VALIDATION ==========")
 
-    for name, count in problems.items():
-        print(name, ":", count)
+        for name, count in problems.items():
+            print(name, ":", count)
 
     return problems
 

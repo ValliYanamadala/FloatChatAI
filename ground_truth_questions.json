@@ -1,0 +1,44 @@
+[
+  {
+    "question": "What is the average temperature of Float ARGO_001?",
+    "expected_tool": "calculate_statistics",
+    "expected_parameters": {
+      "float_id": "ARGO_001",
+      "parameter": "temperature_C",
+      "statistic": "mean"
+    }
+  },
+  {
+    "question": "Show salinity measurements between 100 and 500 dbar.",
+    "expected_tool": "query_measurements",
+    "expected_parameters": {
+      "parameter": "salinity",
+      "min_pressure_dbar": 100,
+      "max_pressure_dbar": 500
+    }
+  },
+  {
+    "question": "Which region has the highest mean dissolved oxygen?",
+    "expected_tool": "region_statistics",
+    "expected_parameters": {
+      "group_by": "region",
+      "parameter": "dissolved_oxygen_umol_kg",
+      "statistic": "mean"
+    }
+  },
+  {
+    "question": "What are the temperature values at each pressure level?",
+    "expected_tool": "depth_statistics",
+    "expected_parameters": {
+      "group_by": "pressure_dbar",
+      "parameter": "temperature_C"
+    }
+  },
+  {
+    "question": "Is the dataset valid for analysis?",
+    "expected_tool": "validate_data",
+    "expected_parameters": {
+      "required_status": "PASS"
+    }
+  }
+]

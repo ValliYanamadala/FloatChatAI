@@ -35,45 +35,77 @@ def check_data(df):
 
 
 def validate_data(df):
-    """Check whether values fall within reasonable ranges."""
+    """Return a data validation report for an ARGO measurement table."""
 
-    problems = {}
+    def invalid_count(condition):
+        return int(condition.fillna(True).sum())
 
-    # Latitude
-    problems["invalid_latitude"] = (
-        (~df["latitude"].between(-90, 90)).sum()
-    )
+    problems = {
+        "floats": int(df["float_id"].nunique()),
+        "profiles": int(df["profile_id"].nunique())
+        if "profile_id" in df.columns
+        else int(df["float_id"].nunique()),
+        "measurements": len(df),
+        "invalid_latitude": invalid_count(
+            ~df["latitude"].between(-90, 90)
+        ),
+        "invalid_longitude": invalid_count(
+            ~df["longitude"].between(-180, 180)
+        ),
+        "missing_timestamps": int(
+            pd.to_datetime(df["date"], errors="coerce").isna().sum()
+        ) if "date" in df.columns else len(df),
+        "invalid_pressure": invalid_count(
+            (df["pressure_dbar"] < 0)
+            | ~df["pressure_dbar"].notna()
+        ),
+        "invalid_depth": invalid_count(
+            (df["depth_m"] < 0)
+            | ~df["depth_m"].notna()
+        ) if "depth_m" in df.columns else 0,
+        "invalid_temperature": invalid_count(
+            ~df["temperature_C"].between(-3, 40)
+        ),
+        "invalid_salinity": invalid_count(
+            ~df["salinity"].between(0, 45)
+        ),
+        "invalid_oxygen": invalid_count(
+            df["dissolved_oxygen_umol_kg"] < 0
+        ),
+        "invalid_chlorophyll": invalid_count(
+            df["chlorophyll_mg_m3"] < 0
+        ),
+    }
 
-    # Longitude
-    problems["invalid_longitude"] = (
-        (~df["longitude"].between(-180, 180)).sum()
-    )
+    if "profile_id" in df.columns:
+        problems["orphan_measurements"] = int(
+            df["profile_id"].isna().sum()
+        )
+    else:
+        problems["orphan_measurements"] = 0
 
-    # Pressure
-    problems["invalid_pressure"] = (
-        (~df["pressure_dbar"].isin(
-            [10, 50, 100, 200, 500, 1000]
-        )).sum()
-    )
+    if "float_id" in df.columns and "profile_id" in df.columns:
+        profile_floats = df.groupby("profile_id")["float_id"].nunique()
+        problems["orphan_profiles"] = int((profile_floats == 0).sum())
+    else:
+        problems["orphan_profiles"] = 0
 
-    # Temperature
-    problems["invalid_temperature"] = (
-        (~df["temperature_C"].between(-3, 40)).sum()
-    )
-
-    # Salinity
-    problems["invalid_salinity"] = (
-        (~df["salinity"].between(0, 45)).sum()
-    )
-
-    # Oxygen
-    problems["invalid_oxygen"] = (
-        (df["dissolved_oxygen_umol_kg"] < 0).sum()
-    )
-
-    # Chlorophyll
-    problems["invalid_chlorophyll"] = (
-        (df["chlorophyll_mg_m3"] < 0).sum()
+    check_keys = [
+        "invalid_latitude",
+        "invalid_longitude",
+        "missing_timestamps",
+        "invalid_pressure",
+        "invalid_depth",
+        "invalid_temperature",
+        "invalid_salinity",
+        "invalid_oxygen",
+        "invalid_chlorophyll",
+        "orphan_measurements",
+        "orphan_profiles",
+    ]
+    problems["status"] = (
+        "PASS" if all(problems[key] == 0 for key in check_keys)
+        else "FAIL"
     )
 
     print("\n========== VALIDATION ==========")

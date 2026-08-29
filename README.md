@@ -1,177 +1,134 @@
-# ARGO Oceanographic Float Data Backend (SIH Project)
+# FloatChatAI — ARGO Oceanographic Intelligence Platform
 
-Backend and Data Architecture foundation for the **Smart India Hackathon (SIH)** project processing oceanographic ARGO float datasets.
-
----
-
-## 🌊 Architecture & Responsibilities (Member 3)
-
-This backend is designed with a **clean, decoupled, 3-tier architecture** that operates 100% independently while being fully prepared for future AI/LLM integration:
-
-- **Web Framework:** FastAPI (async REST API with OpenAPI documentation)
-- **ASGI Server:** Uvicorn
-- **Database Layer:** PostgreSQL + PostGIS spatial extension
-- **ORM & Data Access:** SQLAlchemy 2.0 (Async) + GeoAlchemy2 + asyncpg
-- **Migrations:** Alembic (async database migration engine)
-- **Data Validation:** Pydantic v2
-- **Spatial Computations:** PostGIS geodesic queries (`ST_DWithin`, `ST_Distance`)
+FloatChatAI is an intelligent, conversational, and spatial analytical platform for querying global ARGO oceanographic float data (temperature, salinity, pressure, trajectory drift, and biogeochemical (BGC) parameters).
 
 ---
 
-## 📂 Project Structure
+## 🌊 Architecture Overview
 
-```
-SIH-Project/
-├── app/
-│   ├── api/
-│   │   ├── v1/
-│   │   │   ├── endpoints/
-│   │   │   │   ├── floats.py         # GET /floats, GET /floats/{id}, GET /floats/{id}/trajectory
-│   │   │   │   ├── health.py         # GET /health
-│   │   │   │   ├── measurements.py   # GET /measurements
-│   │   │   │   ├── profiles.py       # GET /profiles, GET /profiles/{id}
-│   │   │   │   ├── query.py          # POST /query (multi-criteria & AI-ready)
-│   │   │   │   ├── spatial.py        # POST /nearest-floats (PostGIS spatial queries)
-│   │   │   │   └── statistics.py     # GET /statistics (oceanographic stats)
-│   │   │   └── router.py             # Router aggregator
-│   │   └── __init__.py
-│   ├── core/
-│   │   ├── config.py                 # Pydantic Settings (.env configuration)
-│   │   └── logging.py                # Structured application logger
-│   ├── db/
-│   │   ├── base.py                   # SQLAlchemy 2.0 DeclarativeBase
-│   │   └── session.py                # Async engine, sessionmaker, and get_db dependency
-│   ├── models/                       # SQLAlchemy Database Models (modular, ready for ARGO tables)
-│   │   └── __init__.py
-│   ├── schemas/                      # Pydantic v2 validation & response models
-│   │   ├── common.py                 # Pagination & GeoJSON standards
-│   │   ├── floats.py                 # Float & trajectory schemas
-│   │   ├── health.py                 # Health status schema
-│   │   ├── measurements.py           # Depth & sensor measurement schemas
-│   │   ├── profiles.py               # Cycle profile schemas
-│   │   ├── query.py                  # Structured query & AI prompt schemas
-│   │   ├── spatial.py                # PostGIS nearest-float schemas
-│   │   └── statistics.py             # Ocean statistics schemas
-│   └── main.py                       # FastAPI application entrypoint & middleware
-├── alembic/                          # Alembic async database migration scripts
-│   ├── versions/
-│   ├── env.py
-│   └── script.py.mako
-├── tests/                            # Automated test suite (pytest + httpx)
-│   ├── conftest.py
-│   ├── test_endpoints.py
-│   └── test_health.py
-├── .env.example                      # Sample configuration
-├── alembic.ini                       # Alembic config
-├── docker-compose.yml                # PostgreSQL 16 + PostGIS 3.4 container
-├── requirements.txt                  # Python dependencies
-└── README.md
+```text
+User Question ("Show upper 100m temperature and salinity for ARGO_001")
+                         │
+                         ▼
+             QueryUnderstandingService (ai/agent)
+                         │
+        ┌────────────────┴────────────────┐
+        ▼                                 ▼
+   LLM Provider                    RAG Knowledge Layer (ai/rag)
+  (ai/llm/provider)            (ChromaDB + Domain Terms + Data Rules)
+        │                                 │
+        └────────────────┬────────────────┘
+                         ▼
+              Validated QueryPlan Contract (ai/schemas)
+                         │
+                         ▼
+             Adapter / MCP Tool Interface (app/adapters)
+                         │
+                         ▼
+             FastAPI Backend Services (app/api/v1)
+                         │
+                         ▼
+             PostgreSQL 16 + PostGIS Spatial Engine
+             (SQLAlchemy 2.0 Async + GeoAlchemy2)
+                         │
+                         ▼
+              Structured Result + Trajectory + BGC Slices
+                         │
+                         ▼
+        Interactive Visualizations & Scientific Explanations
 ```
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Key Capabilities
+
+1. **Deterministic & SQL-Safe AI Querying:**
+   - The LLM never generates or executes raw SQL. It produces validated Pydantic `QueryPlan` contracts routed to strictly parameterized backend queries.
+2. **PostGIS Geodesic Spatial Indexing:**
+   - Real-time spatial bounding envelope containment (`ST_Within`, `ST_MakeEnvelope`) and geodesic radius proximity searches (`ST_DWithin`, `ST_Distance`).
+3. **Multi-Parameter & BGC Float Profiles:**
+   - Physical core measurements (`temperature`, `salinity`, `pressure`, `density`) joined with Biogeochemical sensor data (`dissolved oxygen`, `oxygen saturation`, `chlorophyll-a`, `nitrate`, `pH`, `PAR`).
+4. **Domain-Curated RAG System:**
+   - Semantic chunking and retrieval from curated knowledge bases (ocean terminology, ARGO instrumentation, data quality flags).
+5. **Offline & Fallback Resilience:**
+   - Rule-based deterministic semantic parser ensuring 100% functionality even when external AI APIs are offline.
+
+---
+
+## 📁 Repository Structure
+
+```text
+FloatChatAI/
+├── ai/                             # Authoritative AI & RAG Subsystem
+│   ├── agent/                      # Query understanding and intent validation
+│   ├── llm/                        # Provider-independent LLM abstractions
+│   ├── prompts/                    # System prompts for intent & query planning
+│   ├── rag/                        # RAG ingestion, chunking, embeddings & retriever
+│   └── schemas/                    # Pydantic AI contracts (Intent, QueryPlan, AIResponse)
+├── app/                            # FastAPI Oceanographic Backend
+│   ├── adapters/                   # Bridges translating AI QueryPlan -> Backend requests
+│   ├── api/v1/endpoints/           # REST & PostGIS endpoints (/query, /floats, /profiles, etc.)
+│   ├── core/                       # App settings, DB URIs, structured logging
+│   ├── db/                         # SQLAlchemy 2.0 async engine & session management
+│   ├── models/                     # Float, Profile, Measurement, BGCMeasurement ORM models
+│   ├── schemas/                    # Pydantic request/response validation schemas
+│   └── services/ai/                # Offline deterministic parser & query utilities
+├── alembic/                        # Database migration scripts (PostGIS DDL, tables, indexes)
+├── data/                           # Data directory (raw, processed, scripts, ChromaDB)
+├── docker/                         # Docker container configurations
+├── docs/                           # Documentation and technical specifications
+├── frontend/                       # React + TypeScript frontend application (planned)
+├── mcp/                            # Model Context Protocol tools (planned)
+├── tests/                          # Unified test suite (AI schemas, RAG, endpoints, spatial)
+├── docker-compose.yml              # PostgreSQL + PostGIS & ChromaDB services
+├── import_argo_data.py             # Bulk dataset ingestion ETL pipeline
+├── argo_20_global_demo_extended.xlsx # Global demo dataset (20 floats, 120 depth profiles + BGC)
+├── requirements.txt                # Unified Python dependencies
+└── README.md                       # Project documentation
+```
+
+---
+
+## 🛠️ Quickstart & Local Setup
 
 ### 1. Prerequisites
-- Python 3.10+ (Tested on Python 3.14)
-- Docker & Docker Desktop (for running PostgreSQL + PostGIS locally)
+- Python 3.11+
+- Docker & Docker Compose (or local PostgreSQL with PostGIS extension)
 
----
-
-### 2. Environment Setup
-
-Clone and navigate to the project directory:
+### 2. Virtual Environment & Dependencies
 ```bash
-cd SIH-Project
-```
-
-Create and activate a virtual environment:
-* **Windows (PowerShell):**
-  ```powershell
-  python -m venv .venv
-  .venv\Scripts\Activate.ps1
-  ```
-* **Linux / macOS:**
-  ```bash
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
-
-Install dependencies:
-```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
----
-
-### 3. Start PostgreSQL + PostGIS (Docker)
-
-Start the PostGIS container in the background:
+### 3. Start Database & Vector Store
 ```bash
 docker-compose up -d
 ```
+*Spins up PostgreSQL with PostGIS on port `5432` and ChromaDB on port `8001`.*
 
-The database container includes:
-- **Port:** `5432`
-- **Database:** `argo_db`
-- **User:** `argo_user`
-- **Password:** `argo_password`
-- **Extension:** PostGIS 3.4 pre-enabled
-
----
-
-### 4. Configure Environment Variables
-
-Copy `.env.example` to `.env`:
+### 4. Configure Environment
 ```bash
-# Windows
-copy .env.example .env
-
-# Linux / macOS
 cp .env.example .env
 ```
 
----
-
-### 5. Run Database Migrations (Alembic)
-
-To apply future database migrations once the ARGO dataset schema is defined:
+### 5. Apply Migrations & Ingest Dataset
 ```bash
+# Apply PostGIS and table migrations
 alembic upgrade head
+
+# Ingest global demo float dataset
+python3 import_argo_data.py
 ```
 
-To create a new migration after adding models in `app/models/`:
-```bash
-alembic revision --autogenerate -m "create_argo_tables"
-```
-
----
-
-### 6. Run the FastAPI Application
-
-Start the development server with hot-reload enabled:
+### 6. Run Development Server
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-
-The application will be accessible at:
 - **API Base:** `http://localhost:8000`
 - **Interactive Swagger Docs:** `http://localhost:8000/docs`
 - **ReDoc Docs:** `http://localhost:8000/redoc`
-
----
-
-## 🧪 Running Tests
-
-Run the test suite with `pytest`:
-```bash
-pytest
-```
-
-Run tests with detailed coverage and logs:
-```bash
-pytest -v -s
-```
 
 ---
 
@@ -179,27 +136,32 @@ pytest -v -s
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/health` | Application and database health check |
-| `GET` | `/floats` | Paginated list of ARGO oceanographic floats |
-| `GET` | `/floats/{id}` | Detailed float metadata by WMO ID |
-| `GET` | `/floats/{id}/trajectory` | Float drift and cycle trajectory coordinates |
-| `GET` | `/profiles` | List of float cycle profiles |
-| `GET` | `/profiles/{id}` | Single profile cycle detail |
-| `GET` | `/measurements` | Vertical depth slices (temperature, salinity, pressure) |
-| `GET` | `/statistics` | Oceanographic statistics across bounding box & time |
-| `POST` | `/nearest-floats` | PostGIS spatial geodesic proximity search |
-| `POST` | `/query` | Multi-criteria filter & decoupled AI integration interface |
+| `GET` | `/health` | Application & PostGIS database health check |
+| `GET` | `/floats` | Paginated list of ARGO floats with profile counts |
+| `GET` | `/floats/{id}` | Float metadata by WMO ID |
+| `GET` | `/floats/{id}/trajectory` | Chronological float drift trajectory (lat, lon, cycle) |
+| `GET` | `/profiles` | Paginated float cycle profiles |
+| `GET` | `/profiles/{id}` | Single profile cycle with vertical depth slices |
+| `GET` | `/measurements` | Vertical measurements with BGC outer join |
+| `GET` | `/statistics` | Global / regional oceanographic summary statistics |
+| `POST` | `/nearest-floats` | PostGIS geodesic proximity radius search |
+| `POST` | `/query` | Dynamic multi-criteria engine (float IDs, bbox, depth, dates, parameters) |
 
-*Note: All endpoints are also available under the `/api/v1` prefix (e.g., `/api/v1/health`).*
+*All endpoints are also prefixed under `/api/v1` (e.g. `/api/v1/query`).*
 
 ---
 
-## 🧩 Modular Design for Future Schema & AI Integration
+## 🧪 Testing
 
-1. **ARGO Schema Addition:**
-   - When the real dataset format (NetCDF/CSV) is confirmed, define SQLAlchemy models in `app/models/` and Pydantic schemas in `app/schemas/`.
-   - Run `alembic revision --autogenerate -m "add_argo_tables"` and `alembic upgrade head`.
+Run the complete test suite:
 
-2. **AI Layer Integration:**
-   - The `/query` endpoint accepts structured filter parameters and an optional `natural_language_prompt` payload.
-   - When the AI team builds their NLP/Text-to-SQL or RAG layer, it can consume `/query` or service query builders without altering database access rules or frontend contracts.
+```bash
+# Run pytest (all endpoints, health, AI query tests, schemas, RAG)
+pytest -v
+
+# Run standard unittest discover
+python3 -m unittest discover -s tests
+
+# Verify compilation
+python3 -m compileall ai app tests
+```

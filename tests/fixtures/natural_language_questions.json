@@ -1,0 +1,239 @@
+[
+  {
+    "id": "float_search_arabian_sea",
+    "question": "Show me ARGO floats in the Arabian Sea.",
+    "expected_intent": "float_search",
+    "expected_mcp_tool": "search_floats",
+    "expected_entities": {"region": "Arabian Sea"},
+    "clarification_required": false
+  },
+  {
+    "id": "float_search_bay_of_bengal",
+    "question": "Find floats in the Bay of Bengal.",
+    "expected_intent": "float_search",
+    "expected_mcp_tool": "search_floats",
+    "expected_entities": {"region": "Bay of Bengal"},
+    "clarification_required": false
+  },
+  {
+    "id": "nearest_chennai",
+    "question": "Which ARGO floats are closest to Chennai?",
+    "expected_intent": "nearest_float",
+    "expected_mcp_tool": "nearest_floats",
+    "expected_entities": {"location": {"name": "Chennai"}},
+    "clarification_required": false
+  },
+  {
+    "id": "nearest_coordinates",
+    "question": "Find the nearest floats to 13.08 N, 80.27 E.",
+    "expected_intent": "nearest_float",
+    "expected_mcp_tool": "nearest_floats",
+    "expected_entities": {"location": {"latitude": 13.08, "longitude": 80.27}},
+    "clarification_required": false
+  },
+  {
+    "id": "nearest_me",
+    "question": "Find floats near me.",
+    "expected_intent": "nearest_float",
+    "expected_mcp_tool": null,
+    "expected_entities": {},
+    "clarification_required": true
+  },
+  {
+    "id": "salinity_profile_equator",
+    "question": "Show salinity profiles near the equator.",
+    "expected_intent": "profile_query",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {"parameters": ["salinity"], "region": "equator"},
+    "clarification_required": false
+  },
+  {
+    "id": "profile_specific_float",
+    "question": "Show the salinity profile of float ARGO_001.",
+    "expected_intent": "profile_query",
+    "expected_mcp_tool": "get_profile",
+    "expected_entities": {"parameters": ["salinity"], "float_id": "ARGO_001"},
+    "clarification_required": false
+  },
+  {
+    "id": "trajectory_float_numeric",
+    "question": "Show the trajectory of float 2901234.",
+    "expected_intent": "trajectory",
+    "expected_mcp_tool": "get_trajectory",
+    "expected_entities": {"float_id": "2901234"},
+    "clarification_required": false
+  },
+  {
+    "id": "trajectory_float_named",
+    "question": "Plot the path of ARGO_001.",
+    "expected_intent": "trajectory",
+    "expected_mcp_tool": "get_trajectory",
+    "expected_entities": {"float_id": "ARGO_001"},
+    "clarification_required": false
+  },
+  {
+    "id": "temperature_six_months",
+    "question": "Show temperature changes over the last six months.",
+    "expected_intent": "time_series",
+    "expected_mcp_tool": null,
+    "expected_entities": {"parameters": ["temperature"]},
+    "clarification_required": true
+  },
+  {
+    "id": "temperature_date_range_region",
+    "question": "Show temperature in the Arabian Sea from 2023-01-01 to 2023-06-30.",
+    "expected_intent": "time_series",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {
+      "parameters": ["temperature"],
+      "region": "Arabian Sea",
+      "start_date": "2023-01-01",
+      "end_date": "2023-06-30"
+    },
+    "clarification_required": false
+  },
+  {
+    "id": "oxygen_bay_of_bengal",
+    "question": "Plot dissolved oxygen observations in the Bay of Bengal for March 2023.",
+    "expected_intent": "time_series",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {"parameters": ["oxygen"], "region": "Bay of Bengal", "date_hint": "March 2023"},
+    "clarification_required": false
+  },
+  {
+    "id": "nitrate_time_series",
+    "question": "Show nitrate trends near the equator between 2022-05-01 and 2022-08-31.",
+    "expected_intent": "time_series",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {
+      "parameters": ["nitrate"],
+      "region": "equator",
+      "start_date": "2022-05-01",
+      "end_date": "2022-08-31"
+    },
+    "clarification_required": false
+  },
+  {
+    "id": "compare_salinity_regions",
+    "question": "Compare salinity in the Arabian Sea and Bay of Bengal.",
+    "expected_intent": "comparison",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {"parameters": ["salinity"], "comparison_targets": ["Arabian Sea", "Bay of Bengal"]},
+    "clarification_required": false
+  },
+  {
+    "id": "compare_temperature_ambiguous",
+    "question": "Compare temperature.",
+    "expected_intent": "comparison",
+    "expected_mcp_tool": null,
+    "expected_entities": {"parameters": ["temperature"]},
+    "clarification_required": true
+  },
+  {
+    "id": "average_temperature",
+    "question": "What is the average temperature?",
+    "expected_intent": "statistics",
+    "expected_mcp_tool": null,
+    "expected_entities": {"parameters": ["temperature"], "statistic": "average"},
+    "clarification_required": true
+  },
+  {
+    "id": "average_temperature_region",
+    "question": "What is the average temperature in the Arabian Sea?",
+    "expected_intent": "statistics",
+    "expected_mcp_tool": "get_statistics",
+    "expected_entities": {"parameters": ["temperature"], "region": "Arabian Sea", "statistic": "average"},
+    "clarification_required": false
+  },
+  {
+    "id": "max_chlorophyll_depth",
+    "question": "Where is chlorophyll highest between 0 and 100 meters?",
+    "expected_intent": "statistics",
+    "expected_mcp_tool": "get_statistics",
+    "expected_entities": {
+      "parameters": ["chlorophyll"],
+      "depth_range_m": {"min_depth_m": 0, "max_depth_m": 100},
+      "statistic": "maximum"
+    },
+    "clarification_required": false
+  },
+  {
+    "id": "pressure_measurements",
+    "question": "Give me salinity measurements between 100 and 500 dbar.",
+    "expected_intent": "profile_query",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {
+      "parameters": ["salinity"],
+      "pressure_range_dbar": {"min_pressure_dbar": 100, "max_pressure_dbar": 500}
+    },
+    "clarification_required": false
+  },
+  {
+    "id": "depth_measurements",
+    "question": "Show oxygen measurements from 50 to 200 meters depth in the Indian Ocean.",
+    "expected_intent": "profile_query",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {
+      "parameters": ["oxygen"],
+      "region": "Indian Ocean",
+      "depth_range_m": {"min_depth_m": 50, "max_depth_m": 200}
+    },
+    "clarification_required": false
+  },
+  {
+    "id": "float_parameters_numeric",
+    "question": "What parameters does float 2901234 measure?",
+    "expected_intent": "metadata",
+    "expected_mcp_tool": "get_float_metadata",
+    "expected_entities": {"float_id": "2901234"},
+    "clarification_required": false
+  },
+  {
+    "id": "float_metadata_named",
+    "question": "Tell me about float ARGO_001.",
+    "expected_intent": "metadata",
+    "expected_mcp_tool": "get_float_metadata",
+    "expected_entities": {"float_id": "ARGO_001"},
+    "clarification_required": false
+  },
+  {
+    "id": "platform_metadata",
+    "question": "Show metadata for platform number 2901234.",
+    "expected_intent": "metadata",
+    "expected_mcp_tool": "get_float_metadata",
+    "expected_entities": {"platform_number": "2901234"},
+    "clarification_required": false
+  },
+  {
+    "id": "ph_region",
+    "question": "Show pH observations in the Arabian Sea.",
+    "expected_intent": "profile_query",
+    "expected_mcp_tool": "query_measurements",
+    "expected_entities": {"parameters": ["ph"], "region": "Arabian Sea"},
+    "clarification_required": false
+  },
+  {
+    "id": "unsupported_waves",
+    "question": "Show wave height near Chennai.",
+    "expected_intent": null,
+    "expected_mcp_tool": null,
+    "expected_entities": {"unsupported_parameter": "wave_height", "location": {"name": "Chennai"}},
+    "clarification_required": true
+  },
+  {
+    "id": "unsupported_wind",
+    "question": "Compare wind speed in the Arabian Sea and Bay of Bengal.",
+    "expected_intent": null,
+    "expected_mcp_tool": null,
+    "expected_entities": {"unsupported_parameter": "wind_speed"},
+    "clarification_required": true
+  },
+  {
+    "id": "show_temperature_ambiguous",
+    "question": "Show temperature.",
+    "expected_intent": "time_series",
+    "expected_mcp_tool": null,
+    "expected_entities": {"parameters": ["temperature"]},
+    "clarification_required": true
+  }
+]

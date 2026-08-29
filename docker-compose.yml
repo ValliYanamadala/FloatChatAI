@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  postgis:
+  postgres:
     image: postgis/postgis:16-3.4
-    container_name: argo_postgis
+    container_name: floatchat_postgis
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-argo_user}
@@ -12,13 +12,24 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-argo_user} -d ${POSTGRES_DB:-argo_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: floatchat_chroma
+    restart: unless-stopped
+    ports:
+      - "${CHROMA_PORT:-8001}:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
 volumes:
-  pgdata:
+  postgres_data:
+    driver: local
+  chroma_data:
     driver: local

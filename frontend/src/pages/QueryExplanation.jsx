@@ -1,39 +1,86 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
+import { sendAIQuery } from "../services/api";
 
 function QueryExplanation() {
   const [trace, setTrace] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
 
-  useEffect(() => {
+  const loadSavedTrace = () => {
     try {
       const saved = localStorage.getItem("floatchat_latest_query_trace");
       if (saved) {
         setTrace(JSON.parse(saved));
+        return true;
       }
     } catch {
       // Fallback
     }
+    return false;
+  };
+
+  // Run live query through real backend if no trace exists or on user request
+  const runLiveExplanation = async (promptToRun) => {
+    const query = (promptToRun || customPrompt || "What are the nearest ARGO floats to 15°N, 65°E?").trim();
+    setLoading(true);
+    const startTime = performance.now();
+    try {
+      const response = await sendAIQuery(query);
+      const latencyMs = Math.round(performance.now() - startTime);
+      const newTrace = {
+        prompt: query,
+        response,
+        latencyMs,
+        timestamp: new Date().toISOString(),
+      };
+      setTrace(newTrace);
+      try {
+        localStorage.setItem("floatchat_latest_query_trace", JSON.stringify(newTrace));
+      } catch {
+        // Ignore quota
+      }
+    } catch (err) {
+      console.error("Query explanation error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const hasTrace = loadSavedTrace();
+    if (!hasTrace) {
+      runLiveExplanation("What are the nearest ARGO floats to 15°N, 65°E?");
+    }
   }, []);
 
-  const defaultPrompt = "Compare salinity in the Arabian Sea during the last six months.";
-  const queryText = trace?.prompt || defaultPrompt;
+  const queryText = trace?.prompt || "What are the nearest ARGO floats to 15°N, 65°E?";
   const aiContext = trace?.response?.ai_context;
   const parsedIntent = aiContext?.parsed_intent;
 
   const parametersText = parsedIntent?.parameters?.length
     ? parsedIntent.parameters.join(", ")
-    : "Salinity, Temperature";
+    : (parsedIntent?.bounding_box ? "Spatial Coordinates / Proximity" : "N/A");
 
   const regionText = parsedIntent?.bounding_box
-    ? `Bounding Box [${parsedIntent.bounding_box.min_lat}°, ${parsedIntent.bounding_box.min_lon}°] to [${parsedIntent.bounding_box.max_lat}°, ${parsedIntent.bounding_box.max_lon}°]`
-    : "Arabian Sea";
+    ? `Bounding Box [${parsedIntent.bounding_box.min_lat.toFixed(2)}°, ${parsedIntent.bounding_box.min_lon.toFixed(2)}°] to [${parsedIntent.bounding_box.max_lat.toFixed(2)}°, ${parsedIntent.bounding_box.max_lon.toFixed(2)}°]`
+    : "N/A";
 
   const periodText = parsedIntent?.start_date
     ? `${parsedIntent.start_date} to ${parsedIntent.end_date || "present"}`
-    : "Last 6 Months";
+    : "N/A";
 
-  const recordsProcessed = trace?.response?.total_matched ?? 48;
-  const latency = trace?.latencyMs ?? 412;
+  const depthText = parsedIntent?.depth_range
+    ? `${parsedIntent.depth_range.min ?? 0}m - ${parsedIntent.depth_range.max ?? "max"}m`
+    : "N/A";
+
+  const recordsProcessed = trace?.response?.total_matched ?? 0;
+  const returnedCount = trace?.response?.returned_count ?? trace?.response?.data?.length ?? 0;
+  const latency = trace?.latencyMs ?? 0;
+
+  const matchedFloats = trace?.response?.data
+    ? Array.from(new Set(trace.response.data.map((d) => d.float_id).filter(Boolean))).join(", ")
+    : "N/A";
 
   return (
     <div className="app-layout">
@@ -47,10 +94,11 @@ function QueryExplanation() {
           interpreted, processed, and converted into an ocean-data response.
         </p>
 
-        {/* ORIGINAL QUERY */}
+        {/* ORIGINAL QUERY CARD */}
         <section className="query-original-card">
           <span>ORIGINAL QUERY</span>
-          <h2>“{queryText}”</h2>
+          <h2 id="query-original-prompt">“{queryText}”</h2>
+          {loading && <p style={{ color: "#20ddd8", marginTop: "4px" }}>● Fetching live query trace from backend...</p>}
         </section>
 
         <div className="query-main-grid">
@@ -62,12 +110,17 @@ function QueryExplanation() {
               <div className="interpretation-grid">
                 <div className="interpretation-item">
                   <span>PARAMETER</span>
-                  <strong>{parametersText}</strong>
+                  <strong id="query-param-text">{parametersText}</strong>
                 </div>
 
                 <div className="interpretation-item">
                   <span>REGION / LOCATION</span>
-                  <strong>{regionText}</strong>
+                  <strong id="query-region-text">{regionText}</strong>
+                </div>
+
+                <div className="interpretation-item">
+                  <span>DEPTH RANGE</span>
+                  <strong>{depthText}</strong>
                 </div>
 
                 <div className="interpretation-item">
@@ -76,8 +129,13 @@ function QueryExplanation() {
                 </div>
 
                 <div className="interpretation-item">
+                  <span>TARGET FLOATS</span>
+                  <strong id="query-floats-text">{matchedFloats || "All in region"}</strong>
+                </div>
+
+                <div className="interpretation-item">
                   <span>PARSER PIPELINE</span>
-                  <strong>{aiContext?.parser_used || "Deterministic + NLP Rules"}</strong>
+                  <strong>{aiContext?.parser_used || "Deterministic + PostGIS Rules"}</strong>
                 </div>
               </div>
             </section>
@@ -87,7 +145,12 @@ function QueryExplanation() {
 
               <div className="scope-row">
                 <span>Measurements Matched</span>
-                <strong>{recordsProcessed}</strong>
+                <strong id="query-records-matched">{recordsProcessed}</strong>
+              </div>
+
+              <div className="scope-row">
+                <span>Returned Slices</span>
+                <strong>{returnedCount}</strong>
               </div>
 
               <div className="scope-row">
@@ -96,9 +159,14 @@ function QueryExplanation() {
               </div>
 
               <div className="scope-row">
+                <span>Visualization Spec</span>
+                <strong>{aiContext?.visualization?.type ? `${aiContext.visualization.type.toUpperCase()}: ${aiContext.visualization.title}` : "N/A"}</strong>
+              </div>
+
+              <div className="scope-row">
                 <span>AI Grounding Status</span>
-                <strong className="confidence">
-                  {aiContext?.status === "success" ? "100% Validated" : "Grounded"}
+                <strong className="confidence" id="query-grounding-status">
+                  {aiContext?.status === "success" ? "100% Validated" : (aiContext?.status || "Grounded")}
                 </strong>
               </div>
             </section>
@@ -108,7 +176,7 @@ function QueryExplanation() {
           <section className="query-card pipeline-card">
             <div className="pipeline-header">
               <h3>PROCESSING PIPELINE</h3>
-              <span>Latency: {latency} ms</span>
+              <span id="query-latency-display">Latency: {latency} ms</span>
             </div>
 
             <div className="pipeline">
@@ -117,8 +185,7 @@ function QueryExplanation() {
                 <div>
                   <h4>Understand Intent & Extract Entities</h4>
                   <p>
-                    FloatChatAI NLP parsed the natural-language question and
-                    extracted oceanographic parameters, coordinates, and depth filters.
+                    {aiContext?.explanation || "Parsed natural language into structured spatial bounding box and parameters."}
                   </p>
                 </div>
               </div>
@@ -128,7 +195,7 @@ function QueryExplanation() {
                 <div>
                   <h4>Build Validated Query Plan</h4>
                   <p>
-                    Produced a safe, typed QueryPlan contract without generating raw SQL.
+                    Produced typed filter parameters flowing through controlled backend endpoints without generating raw SQL.
                   </p>
                 </div>
               </div>
@@ -138,7 +205,7 @@ function QueryExplanation() {
                 <div>
                   <h4>PostGIS Spatial & Sensor Retrieval</h4>
                   <p>
-                    Executed parameterized PostGIS spatial queries across ARGO core and BGC measurements.
+                    Executed PostGIS bounding box query returning {recordsProcessed} verified measurements from PostgreSQL.
                   </p>
                 </div>
               </div>
@@ -148,7 +215,7 @@ function QueryExplanation() {
                 <div>
                   <h4>Synthesize Grounded Response</h4>
                   <p>
-                    Summarized physical sensor observations strictly from returned data without fabricating values.
+                    {aiContext?.answer || "Synthesized scientific response directly from returned physical observations."}
                   </p>
                 </div>
               </div>
@@ -158,7 +225,7 @@ function QueryExplanation() {
                 <div>
                   <h4>Generate Declarative VisualizationSpec</h4>
                   <p>
-                    Built typed visualization specifications rendered dynamically in the UI.
+                    Produced {aiContext?.visualization?.type || "declarative"} specification rendered by VisualizationRenderer.
                   </p>
                 </div>
               </div>

@@ -14,6 +14,10 @@ shapely>=2.0.5
 alembic>=1.13.2
 greenlet>=3.0.0
 
+# Model Context Protocol (MCP) Server
+mcp>=1.0.0,<2.0.0
+requests>=2.31.0
+
 # AI, RAG & Vector Store
 chromadb>=0.4.0,<2.0
 

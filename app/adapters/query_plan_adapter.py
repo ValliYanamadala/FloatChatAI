@@ -22,7 +22,8 @@ AI_PARAM_TO_BACKEND = {
 class QueryPlanAdapter:
     """
     Adapter layer translating validated AI QueryPlan contracts (ai.schemas.QueryPlan)
-    into backend Pydantic request models (app.schemas.QueryRequest, NearestFloatsRequest).
+    into backend Pydantic request models (app.schemas.QueryRequest, NearestFloatsRequest)
+    and dispatching plans to the MCP tool layer.
     """
 
     @classmethod
@@ -155,3 +156,38 @@ class QueryPlanAdapter:
             max_distance_km=float(max_dist),
             limit=limit,
         )
+
+    @classmethod
+    def execute_via_mcp(cls, plan: QueryPlan) -> dict:
+        """
+        Execute a validated QueryPlan through the corresponding MCP tool function.
+        """
+        import mcp.server as mcp_server
+
+        tool_map = {
+            MCPToolName.SEARCH_FLOATS: mcp_server.search_floats,
+            MCPToolName.NEAREST_FLOATS: mcp_server.nearest_floats,
+            MCPToolName.GET_PROFILE: mcp_server.get_profile,
+            MCPToolName.GET_TRAJECTORY: mcp_server.get_trajectory,
+            MCPToolName.QUERY_MEASUREMENTS: mcp_server.query_measurements,
+            MCPToolName.GET_STATISTICS: mcp_server.get_statistics,
+            MCPToolName.GET_FLOAT_METADATA: mcp_server.get_float_metadata,
+        }
+
+        handler = tool_map.get(plan.tool)
+        if not handler:
+            raise ValueError(f"Unsupported MCP tool in QueryPlan: {plan.tool}")
+
+        args = dict(plan.arguments or {})
+
+        # Normalize nested arguments for MCP tools
+        if plan.tool == MCPToolName.NEAREST_FLOATS and "location" in args and isinstance(args["location"], dict):
+            loc = args.pop("location")
+            if "latitude" in loc:
+                args["latitude"] = loc["latitude"]
+            if "longitude" in loc:
+                args["longitude"] = loc["longitude"]
+            if "radius_km" in loc:
+                args["radius_km"] = loc["radius_km"]
+
+        return handler(**args)

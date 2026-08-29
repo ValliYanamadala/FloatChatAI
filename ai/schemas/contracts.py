@@ -62,13 +62,17 @@ class MCPToolName(str, Enum):
 
 
 class VisualizationType(str, Enum):
-    """Visualization outputs initially supported by the AI contract."""
+    """Visualization outputs supported by the FloatChatAI contract."""
 
     MAP = "map"
     PROFILE_CHART = "profile_chart"
+    PROFILE = "profile"
     TRAJECTORY_MAP = "trajectory_map"
+    TRAJECTORY = "trajectory"
     TIME_SERIES = "time_series"
+    DEPTH_TIME = "depth-time"
     COMPARISON_CHART = "comparison_chart"
+    COMPARISON = "comparison"
     STATISTICS = "statistics"
     TABLE = "table"
 
@@ -166,13 +170,20 @@ class Intent(StrictModel):
 
 
 class VisualizationSpec(StrictModel):
-    """Controlled visualization request."""
+    """Controlled, frontend-independent visualization specification."""
 
     type: VisualizationType
     title: NonEmptyString | None = None
     variables: list[OceanParameter] = Field(default_factory=list)
     x_axis: NonEmptyString | None = None
     y_axis: NonEmptyString | None = None
+    color_field: NonEmptyString | None = None
+    latitude_field: NonEmptyString | None = None
+    longitude_field: NonEmptyString | None = None
+    depth_field: NonEmptyString | None = None
+    time_field: NonEmptyString | None = None
+    units: dict[str, str] = Field(default_factory=dict)
+    data_reference: NonEmptyString | None = None
     options: dict[str, JsonValue] = Field(default_factory=dict)
 
     @field_validator("variables")
@@ -266,7 +277,7 @@ class AIResponseError(StrictModel):
 
 
 class AIResponse(StrictModel):
-    """Structured response envelope for future AI-generated answers."""
+    """Structured response envelope for AI-generated answers and visualizations."""
 
     answer: NonEmptyString | None = None
     intent: Intent | None = None

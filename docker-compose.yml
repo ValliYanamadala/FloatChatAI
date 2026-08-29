@@ -5,6 +5,7 @@ services:
     image: postgis/postgis:16-3.4
     container_name: floatchat_postgis
     restart: unless-stopped
+    profiles: ["infra", "default"]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-argo_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-argo_password}
@@ -23,6 +24,7 @@ services:
     image: chromadb/chroma:latest
     container_name: floatchat_chroma
     restart: unless-stopped
+    profiles: ["infra", "default"]
     ports:
       - "${CHROMA_PORT:-8001}:8000"
     volumes:

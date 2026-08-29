@@ -17,35 +17,36 @@ htmlcov/
 .venv/
 venv/
 env/
+*.egg-info/
+dist/
+build/
 
-# Node
+# Node & Frontend
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-dist/
-build/
 .next/
 .vite/
 coverage/
 
-# IDE/editor
+# IDE & OS
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# macOS
 .DS_Store
+Thumbs.db
 
-# Docker/local runtime
+# Docker & Database Local Storage
 docker/.data/
+pgdata/
 .chroma/
 .chroma*/
 *.log
 
-# Generated datasets and large local artifacts
+# Generated datasets and local cache artifacts
 data/raw/*
 data/processed/*
 !data/raw/.gitkeep

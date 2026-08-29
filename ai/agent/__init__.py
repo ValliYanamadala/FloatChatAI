@@ -7,13 +7,17 @@ from ai.agent.errors import (
     SchemaValidationError,
     UnsupportedRequestError,
 )
+from ai.agent.orchestrator import FloatChatAgent
 from ai.agent.query_understanding import QueryUnderstandingService
+from ai.agent.response_generator import ResponseGenerator
 
 __all__ = [
     "ClarificationRequiredError",
+    "FloatChatAgent",
     "LLMResponseParsingError",
     "QueryUnderstandingError",
     "QueryUnderstandingService",
+    "ResponseGenerator",
     "SchemaValidationError",
     "UnsupportedRequestError",
 ]

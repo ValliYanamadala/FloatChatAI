@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analytics - FloatChat AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "primary-fixed-dim": "#38debb",
+                "on-primary": "#00382d",
+                "primary": "#ffffff",
+                "on-background": "#d6e3ff",
+                "surface-container-highest": "#27354c",
+                "primary-fixed": "#5ffbd6",
+                "error": "#ffb4ab",
+                "surface-container-low": "#0d1c32",
+                "on-tertiary-fixed-variant": "#354767",
+                "on-surface": "#d6e3ff",
+                "on-surface-variant": "#bacac3",
+                "primary-container": "#5ffbd6",
+                "surface-variant": "#27354c",
+                "on-tertiary-container": "#536586",
+                "surface-tint": "#38debb",
+                "background": "#041329",
+                "on-tertiary": "#1e304f",
+                "on-primary-fixed": "#002019",
+                "error-container": "#93000a",
+                "on-error": "#690005",
+                "secondary-fixed": "#d8e2ff",
+                "on-secondary": "#20304f",
+                "outline-variant": "#3c4a45",
+                "outline": "#85948e",
+                "tertiary-fixed-dim": "#b5c7ed",
+                "inverse-on-surface": "#233148",
+                "on-primary-container": "#00725e",
+                "secondary-fixed-dim": "#b6c6ed",
+                "surface-container-high": "#1c2a41",
+                "surface-dim": "#041329",
+                "secondary": "#b6c6ed",
+                "surface": "#041329",
+                "on-secondary-fixed-variant": "#374767",
+                "surface-bright": "#2c3951",
+                "tertiary-fixed": "#d7e3ff",
+                "on-tertiary-fixed": "#061b39",
+                "inverse-surface": "#d6e3ff",
+                "tertiary-container": "#d7e3ff",
+                "on-secondary-container": "#a5b5db",
+                "secondary-container": "#374767",
+                "on-error-container": "#ffdad6",
+                "inverse-primary": "#006b58",
+                "on-secondary-fixed": "#091b39",
+                "tertiary": "#ffffff",
+                "surface-container-lowest": "#010e24",
+                "on-primary-fixed-variant": "#005142",
+                "surface-container": "#112036",
+                "abyssal-navy": "#010e24",
+                "deep-marine": "#0d1c32",
+                "ocean-stroke": "#2c3951",
+                "bright-white": "#ffffff"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "container-padding": "24px",
+                "unit": "4px",
+                "stack-md": "16px",
+                "stack-lg": "32px",
+                "stack-sm": "8px",
+                "gutter": "16px",
+                "margin-desktop": "24px"
+        },
+        "fontFamily": {
+                "mono-data": [
+                        "Geist"
+                ],
+                "body-base": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Geist"
+                ],
+                "label-caps": [
+                        "Geist"
+                ],
+                "display-lg-mobile": [
+                        "Geist"
+                ],
+                "display-lg": [
+                        "Geist"
+                ],
+                "body-sm": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "mono-data": [
+                        "14px",
+                        {
+                                "lineHeight": "1.4",
+                                "letterSpacing": "0em",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-base": [
+                        "16px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "1.3",
+                                "fontWeight": "500"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "1.0",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "display-lg-mobile": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "600"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #2c3951; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #374767; }
+        
+        a, button, div, span, input, select {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Select arrow custom color */
+        input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+}
+        
+        /* Chart Tooltip */
+        .chart-tooltip {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .point-hover:hover + .chart-tooltip {
+            display: block;
+        }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-base min-h-screen flex overflow-hidden">
+<!-- SideNavBar - Web -->
+<nav class="bg-abyssal-navy docked left-0 h-full w-[280px] border-r border-ocean-stroke flat no shadows flex flex-col fixed py-margin-desktop z-50 hidden md:flex">
+<!-- Header -->
+<div class="px-margin-desktop mb-8 flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+<img class="w-10 h-10 rounded-lg object-cover bg-surface-variant border border-ocean-stroke" data-alt="A detailed digital illustration of a sleek, abstract logo design for 'FloatChat AI'. The logo features geometric waves and a stylized neural network node, rendered in a crisp cyan and deep navy color palette, set against a dark, minimalist background. The lighting highlights the crisp edges of the logo, conveying a sense of advanced oceanographic technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzqMQkOMjnP7KOndLYDil0Vt7DiFSYbJyZVDUweG9fq-o9nYNzQFNYy71BoKmqFt-IcOJGM6ThJH756cFtouObx8O_VbhevMubE8mZqbVhYfaotUPUXmB0pKb0ami-oNvuYuKuzhsDhDIn9k9m-QutA1mYfM02i7SYsW9gRoyGmZlwMWkckBvyqHtDKQQkLRen92wVSMDXwHWDRB-xer5LkN12tzZmGU5PgzGDXewtX3M5WW4KDkxC"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-bright-white">FloatChat AI</h1>
+<p class="font-label-caps text-label-caps text-[#a5b5db] uppercase tracking-wider">Ocean Intelligence</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-margin-desktop mb-8">
+<button class="w-full bg-[#00f5ff]/90 text-[#002021] font-label-caps text-label-caps py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-[#00f5ff] hover:shadow-[0_0_15px_rgba(0,245,255,0.3)] border border-[#00f5ff]/20">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Analysis
+            </button>
+</div>
+<!-- Main Nav -->
+<div class="flex-1 px-margin-desktop space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-[#00f5ff] group-hover:brightness-125">home</span>
+<span class="">Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-[#00f5ff] group-hover:brightness-125">explore</span>
+<span class="">Explorer</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-[#00f5ff] group-hover:brightness-125">water_drop</span>
+<span class="">Float Details</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-[#00f5ff]/10 text-bright-white border-l-4 border-[#00f5ff] shadow-[inset_0_0_15px_rgba(0,245,255,0.05)] font-bold font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[20px] text-[#00f5ff]">monitoring</span>
+<span class="">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-[#00f5ff] group-hover:brightness-125">psychology</span>
+<span class="">Query Explanation</span>
+</a>
+</div>
+<!-- Footer Nav -->
+<div class="px-margin-desktop mt-auto pt-4 border-t border-ocean-stroke space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-[#00f5ff] group-hover:brightness-125">sensors</span>
+<span class="">Argo Status</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-[#00f5ff] group-hover:brightness-125">terminal</span>
+<span class="">System Logs</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar - Mobile -->
+<nav class="md:hidden flex justify-between items-center w-full px-gutter h-16 sticky top-0 z-50 bg-abyssal-navy/90 backdrop-blur-xl border-b border-ocean-stroke">
+<div class="font-display-lg-mobile text-[20px] font-bold text-bright-white">FloatChat AI</div>
+<div class="flex gap-4 text-[#a5b5db]">
+<button class="hover:text-[#00f5ff] transition-colors rounded-full p-1"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:text-[#00f5ff] transition-colors rounded-full p-1"><span class="material-symbols-outlined">settings</span></button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[280px] h-screen overflow-y-auto bg-background p-margin-desktop relative z-0 custom-scrollbar">
+<div class="max-w-7xl mx-auto flex flex-col gap-8">
+<!-- Header & Controls -->
+<header class="flex flex-col gap-6">
+<div>
+<h2 class="font-display-lg text-[40px] font-bold"><span class="text-bright-white">Comparative</span> <span class="text-[#64ffda]">Analytics</span></h2>
+<p class="font-body-base text-body-base text-on-surface-variant mt-2">Analyze cross-float parameters and identify spatio-temporal trends.</p>
+</div>
+<!-- Control Bar -->
+<div class="bg-deep-marine rounded-xl p-6 border border-ocean-stroke flex flex-wrap gap-4 items-end shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+<div class="flex-1 min-w-[200px] flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-[#a5b5db] uppercase tracking-wider">Parameter</label>
+<select class="bg-abyssal-navy border border-ocean-stroke rounded-lg text-bright-white font-body-sm text-body-sm p-2.5 focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda] outline-none transition-colors w-full shadow-inner pr-8 cursor-pointer hover:border-surface-variant hover:bg-surface-container-low">
+<option>Temperature (°C)</option>
+<option>Salinity (PSU)</option>
+<option>Dissolved Oxygen (µmol/kg)</option>
+</select>
+</div>
+<div class="flex-1 min-w-[150px] flex flex-col gap-2 group">
+<label class="font-label-caps text-label-caps text-[#a5b5db] uppercase tracking-wider group-hover:text-bright-white">Float A</label>
+<input class="bg-abyssal-navy border border-ocean-stroke rounded-lg text-bright-white font-mono-data text-mono-data p-2.5 focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda] outline-none transition-colors w-full shadow-inner hover:border-surface-variant hover:bg-surface-container-low" type="text" value="2901234"/>
+</div>
+<div class="flex-1 min-w-[150px] flex flex-col gap-2 group">
+<label class="font-label-caps text-label-caps text-[#a5b5db] uppercase tracking-wider group-hover:text-bright-white">Float B</label>
+<input class="bg-abyssal-navy border border-ocean-stroke rounded-lg text-bright-white font-mono-data text-mono-data p-2.5 focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda] outline-none transition-colors w-full shadow-inner hover:border-surface-variant hover:bg-surface-container-low" type="text" value="2901240"/>
+</div>
+<div class="flex-1 min-w-[150px] flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-[#a5b5db] uppercase tracking-wider">Time Period</label>
+<select class="bg-abyssal-navy border border-ocean-stroke rounded-lg text-bright-white font-body-sm text-body-sm p-2.5 focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda] outline-none transition-colors w-full shadow-inner pr-8 cursor-pointer hover:border-surface-variant hover:bg-surface-container-low">
+<option>Last 6 Months</option>
+<option>Last 12 Months</option>
+<option>Custom Range</option>
+</select>
+</div>
+<div class="flex-1 min-w-[150px] flex flex-col gap-2 group">
+<label class="font-label-caps text-label-caps text-[#a5b5db] uppercase tracking-wider group-hover:text-bright-white">Depth Range (m)</label>
+<input class="bg-abyssal-navy border border-ocean-stroke rounded-lg text-bright-white font-mono-data text-mono-data p-2.5 focus:border-[#64ffda] focus:ring-1 focus:ring-[#64ffda] outline-none transition-colors w-full shadow-inner hover:border-surface-variant hover:bg-surface-container-low" placeholder="0 - 2000" type="text" value="0 - 2000"/>
+</div>
+<button class="bg-[#64ffda] text-[#002021] font-label-caps text-label-caps py-2.5 px-6 rounded-lg hover:bg-[#64ffda]/90 hover:shadow-[0_0_15px_rgba(100,255,218,0.3)] transition-all h-[42px] font-bold">
+                        Compare
+                    </button>
+</div>
+</header>
+<!-- Grid Layout for Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Comparison Profile Chart (Left Col) -->
+<div class="lg:col-span-1 bg-deep-marine rounded-xl border border-ocean-stroke p-6 flex flex-col h-[500px] shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+<h3 class="font-label-caps text-label-caps text-bright-white uppercase tracking-wider mb-6 pb-2">Temperature vs Depth</h3>
+<div class="flex-1 relative w-full h-full ml-6 mb-6">
+<!-- Y Axis labels (Depth) -->
+<div class="absolute left-[-40px] top-0 bottom-0 flex flex-col justify-between text-on-surface-variant font-mono-data text-xs items-end pr-2">
+<span>0m</span>
+<span>500m</span>
+<span>1000m</span>
+<span>1500m</span>
+<span>2000m</span>
+</div>
+<!-- X Axis labels (Temp) -->
+<div class="absolute bottom-[-25px] left-0 right-0 flex justify-between text-on-surface-variant font-mono-data text-xs px-2">
+<span>0°C</span>
+<span>10°C</span>
+<span>20°C</span>
+<span>30°C</span>
+</div>
+<!-- Grid Lines -->
+<div class="absolute inset-0 grid grid-rows-4 grid-cols-3 pointer-events-none">
+<div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-[#1c2a41]"></div>
+<div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-[#1c2a41]"></div>
+<div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-[#1c2a41]"></div>
+<div class="border-r border-[#1c2a41]"></div><div class="border-r border-[#1c2a41]"></div><div></div>
+</div>
+<!-- Mock Data Lines (SVG) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Float A -->
+<path class="opacity-90" d="M 80 0 Q 75 20, 40 40 T 15 80 Q 10 90, 5 100" fill="none" stroke="#64ffda" stroke-width="2.5"></path>
+<!-- Float B -->
+<path class="opacity-80" d="M 60 0 Q 65 30, 30 50 T 20 70 Q 15 95, 8 100" fill="none" stroke="#82aaff" stroke-width="2.5"></path>
+<!-- Invisible overlay for hover interaction -->
+<circle class="point-hover opacity-0 cursor-pointer" cx="40" cy="40" r="4"></circle>
+<!-- Marine-styled Tooltip -->
+<g class="chart-tooltip">
+<rect fill="#010e24" height="40" rx="4" stroke="#64ffda" stroke-width="1" width="80" x="45" y="30"></rect>
+<text fill="#a5b5db" font-family="Geist" font-size="10" x="50" y="45">Depth: 800m</text>
+<text fill="#64ffda" font-family="Geist" font-size="10" font-weight="bold" x="50" y="60">Temp: 12.5°C</text>
+</g>
+</svg>
+<!-- Legend -->
+<div class="absolute top-4 right-4 bg-abyssal-navy/80 backdrop-blur p-2.5 rounded-lg border border-ocean-stroke flex flex-col gap-2">
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#64ffda]"></span><span class="font-mono-data text-[12px] text-bright-white">2901234</span></div>
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#82aaff]"></span><span class="font-mono-data text-[12px] text-bright-white">2901240</span></div>
+</div>
+</div>
+</div>
+<!-- Time Series & AI Insight (Right Col span 2) -->
+<div class="lg:col-span-2 flex flex-col gap-6">
+<!-- AI Insight Card -->
+<div class="relative rounded-xl border-l-2 border-[#64ffda] bg-deep-marine p-6 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-[#64ffda] mb-1">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider text-bright-white font-bold">AI Insight</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface leading-relaxed">
+                                "Float <span class="text-[#64ffda] font-mono-data">2901234</span> recorded consistently warmer surface temperatures than Float <span class="text-[#82aaff] font-mono-data">2901240</span> across the selected period. The largest difference (2.4°C) occurred during late July, suggesting distinct current mass encounters despite spatial proximity."
+                            </p>
+</div>
+</div>
+<!-- Time Series Chart -->
+<div class="bg-deep-marine rounded-xl border border-ocean-stroke p-6 flex-1 flex flex-col min-h-[350px] shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
+<h3 class="font-label-caps text-label-caps text-bright-white uppercase tracking-wider mb-6 pb-2">Surface Temperature Over Time (Mar - Aug)</h3>
+<div class="flex-1 relative w-full h-full">
+<!-- Y Axis -->
+<div class="absolute left-[-30px] top-0 bottom-0 flex flex-col justify-between text-on-surface-variant font-mono-data text-xs items-end pr-2 pb-6">
+<span>25°</span>
+<span>20°</span>
+<span>15°</span>
+<span>10°</span>
+</div>
+<!-- X Axis -->
+<div class="absolute bottom-[-25px] left-0 right-0 flex justify-between text-on-surface-variant font-mono-data text-xs px-2 pl-6">
+<span>Mar</span>
+<span>Apr</span>
+<span>May</span>
+<span>Jun</span>
+<span>Jul</span>
+<span>Aug</span>
+</div>
+<!-- Grid Lines -->
+<div class="absolute inset-0 grid grid-rows-3 grid-cols-5 pointer-events-none mb-6 ml-6">
+<div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-[#1c2a41]"></div>
+<div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-r border-[#1c2a41]"></div><div class="border-b border-[#1c2a41]"></div>
+<div class="border-r border-[#1c2a41]"></div><div class="border-r border-[#1c2a41]"></div><div class="border-r border-[#1c2a41]"></div><div class="border-r border-[#1c2a41]"></div><div></div>
+</div>
+<!-- Mock Data Lines (SVG) -->
+<svg class="absolute inset-0 w-full h-full pt-2 pr-2 pb-6 pl-6" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Highlight Box for Jul Difference -->
+<rect fill="rgba(100, 255, 218, 0.1)" height="35" stroke="rgba(100, 255, 218, 0.3)" stroke-width="1" width="10" x="75" y="15"></rect>
+<line stroke="#a5b5db" stroke-dasharray="2,2" stroke-width="1" x1="80" x2="80" y1="20" y2="50"></line>
+<!-- Annotation -->
+<text fill="#a5b5db" font-family="Geist" font-size="3" text-anchor="middle" x="80" y="12">Largest Difference</text>
+<text fill="#64ffda" font-family="Geist" font-size="3" font-weight="bold" text-anchor="middle" x="80" y="16">Δ 2.4°C</text>
+<!-- Float A (Warmer) -->
+<path class="opacity-90 drop-shadow-[0_0_8px_rgba(100,255,218,0.3)]" d="M 0 60 Q 20 55, 40 40 T 80 20 Q 90 10, 100 15" fill="none" stroke="#64ffda" stroke-width="2.5"></path>
+<!-- Float B (Cooler) -->
+<path class="opacity-80" d="M 0 70 Q 20 65, 40 60 T 80 50 Q 90 45, 100 48" fill="none" stroke="#82aaff" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

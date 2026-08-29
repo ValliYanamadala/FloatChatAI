@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FloatChat AI - Ocean Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "outline-variant": "#3a494a",
+                "on-surface": "#d9e3f8",
+                "on-tertiary": "#1a2b6a",
+                "surface-container": "#16202f",
+                "on-surface-variant": "#b9caca",
+                "background": "#091422",
+                "surface-container-high": "#212a3a",
+                "inverse-on-surface": "#273140",
+                "surface": "#091422",
+                "surface-container-low": "#121c2b",
+                "tertiary-container": "#d7dcff",
+                "on-primary-container": "#006c71",
+                "tertiary-fixed-dim": "#b8c4ff",
+                "tertiary-fixed": "#dde1ff",
+                "abyssal-navy": "#010816",
+                "secondary": "#5dd7e4",
+                "surface-dim": "#091422",
+                "on-secondary-fixed-variant": "#004f55",
+                "secondary-fixed": "#85f3ff",
+                "secondary-fixed-dim": "#5dd7e4",
+                "surface-bright": "#303a4a",
+                "bright-white": "#ffffff",
+                "inverse-surface": "#d9e3f8",
+                "primary-container": "#00f5ff",
+                "error": "#ffb4ab",
+                "inverse-primary": "#00696e",
+                "on-tertiary-fixed": "#001354",
+                "deep-marine": "#0d1c32",
+                "primary-fixed-dim": "#00dce5",
+                "on-secondary-fixed": "#002023",
+                "on-background": "#d9e3f8",
+                "on-primary": "#003739",
+                "primary-fixed": "#63f7ff",
+                "surface-container-lowest": "#050e1d",
+                "on-tertiary-fixed-variant": "#334282",
+                "ocean-stroke": "#1e2f4d",
+                "tertiary": "#fcf9ff",
+                "primary": "#e9feff",
+                "on-error-container": "#ffdad6",
+                "surface-tint": "#00dce5",
+                "surface-variant": "#2b3545",
+                "on-secondary": "#00363b",
+                "on-primary-fixed": "#002021",
+                "on-tertiary-container": "#4e5d9f",
+                "outline": "#849495",
+                "on-primary-fixed-variant": "#004f53",
+                "secondary-container": "#00a3af",
+                "midnight-abyssal": "#020c1d",
+                "on-error": "#690005",
+                "error-container": "#93000a",
+                "on-secondary-container": "#003236",
+                "surface-container-highest": "#2b3545"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "16px",
+                "gutter": "16px",
+                "unit": "4px",
+                "margin-desktop": "24px",
+                "sidebar-width": "280px"
+        },
+        "fontFamily": {
+                "body-sm": [
+                        "Geist"
+                ],
+                "label-caps": [
+                        "Geist"
+                ],
+                "display-lg": [
+                        "Geist"
+                ],
+                "body-base": [
+                        "Geist"
+                ],
+                "display-lg-mobile": [
+                        "Geist"
+                ],
+                "headline-md": [
+                        "Geist"
+                ],
+                "headline-sm": [
+                        "Geist"
+                ],
+                "mono-data": [
+                        "Geist"
+                ]
+        },
+        "fontSize": {
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "1.0",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "display-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-base": [
+                        "16px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "display-lg-mobile": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "1.3",
+                                "fontWeight": "500"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "500"
+                        }
+                ],
+                "mono-data": [
+                        "14px",
+                        {
+                                "lineHeight": "1.4",
+                                "letterSpacing": "0em",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2f4d; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #303a4a; }
+        
+        /* Smooth transitions */
+        a, button, div, span {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-deep-marine text-on-surface font-body-base min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Desktop Only) -->
+<nav class="bg-abyssal-navy docked left-0 h-full w-[280px] border-r border-ocean-stroke flat no shadows flex flex-col fixed py-margin-desktop z-50 hidden md:flex">
+<!-- Header -->
+<div class="px-margin-desktop mb-8 flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
+<img class="w-10 h-10 rounded-lg object-cover bg-surface-variant border border-ocean-stroke" data-alt="A detailed digital illustration of a sleek, abstract logo design for 'FloatChat AI'. The logo features geometric waves and a stylized neural network node, rendered in a crisp cyan and deep navy color palette, set against a dark, minimalist background. The lighting highlights the crisp edges of the logo, conveying a sense of advanced oceanographic technology." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa81Gsv-U9-3h6toY85S9GCpkHnpUK0KyTRWnfVbzmevirs9Yppzq0CzFOTJiL3yUbx2l5BlvTjOFS4NDOlHgTiUdEJhwRwGTVIFhgYwxJSTFLc6AzX8ajl3Xy_zG3apW61c9A4v7IUsF6pUdc_4OOtoxnMmY9-DKK9nboQLLSKK3HQVrKmVfYtvlceqIWyNg7oIZqgG_5gTDa17feN38UanImjgtzB_h0kkq93rDCG3Zt5u7vJECx"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-bright-white">FloatChat AI</h1>
+<p class="font-label-caps text-label-caps text-[#a5b4fc] uppercase tracking-wider">Ocean Intelligence</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-margin-desktop mb-8">
+<button class="w-full bg-primary-container/90 text-on-primary-container font-label-caps text-label-caps py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-primary-container hover:shadow-[0_0_15px_rgba(0,245,255,0.3)] border border-primary-container/20">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Analysis
+            </button>
+</div>
+<!-- Main Nav -->
+<div class="flex-1 px-margin-desktop space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container/20 text-bright-white border-l-4 border-[#00f5ff] shadow-[inset_0_0_15px_rgba(0,245,255,0.1)] font-bold font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[20px] text-[#00f5ff]">home</span>
+<span class="">Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-container group-hover:brightness-125">explore</span>
+<span class="">Explorer</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-container group-hover:brightness-125">water_drop</span>
+<span class="">Float Details</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-container group-hover:brightness-125">monitoring</span>
+<span class="">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-container group-hover:brightness-125">psychology</span>
+<span class="">Query Explanation</span>
+</a>
+</div>
+<!-- Footer Nav -->
+<div class="px-margin-desktop mt-auto pt-4 border-t border-ocean-stroke space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-container group-hover:brightness-125">sensors</span>
+<span class="">Argo Status</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-bright-white hover:bg-surface-variant/80 font-label-caps text-label-caps group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-container group-hover:brightness-125">terminal</span>
+<span class="">System Logs</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col w-full min-h-screen relative overflow-hidden md:ml-[280px]">
+<!-- TopNavBar (Mobile Only) -->
+<header class="md:hidden flex justify-between items-center w-full px-gutter h-16 sticky top-0 z-50 bg-abyssal-navy/90 backdrop-blur-xl border-b border-ocean-stroke shadow-sm text-bright-white">
+<div class="font-display-lg-mobile text-[20px] font-bold">FloatChat AI</div>
+<div class="flex gap-4">
+<button class="hover:bg-surface-variant/50 transition-colors rounded-full p-2 active:scale-95 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:bg-surface-variant/50 transition-colors rounded-full p-2 active:scale-95 duration-200">
+<img alt="Researcher Profile" class="w-8 h-8 rounded-full object-cover" data-alt="A professional headshot of a marine researcher or oceanographer, wearing smart casual attire against a subtle deep blue, high-tech background. The lighting is soft and cinematic, conveying expertise and focus in a modern scientific context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAHlYLMFayGMksbgFePDZOB0K5Uf_x1t920kCAVHTHGTRgdS3gAPrwDfhY1VD0txMSrlSutRC9ojsheRk0EMjDXIOEu8rh6SMaKu3yDvwi1vxJQbOcrNu8hnf0AhbhK4bPrR88SRZVkSAump7PVjOPX0bybID_LZk-tWKXcecH1RBu2DFjR__LJYyE5DdAn1MHfRkTCbFCZBU-AP1zpht58l8kwupARuuqaD12cEWjyHKLkhhsP-25"/>
+</button>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto w-full px-gutter md:px-margin-desktop py-margin-desktop custom-scrollbar">
+<div class="max-w-5xl mx-auto space-y-8">
+<!-- Hero Section -->
+<div class="text-center md:text-left space-y-4 pt-8">
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-bright-white tracking-tight">
+                        Explore the Ocean <br class="hidden md:block"/>
+<span class="text-[#00f5ff] bg-clip-text">Through Conversation</span>
+</h1>
+<p class="font-body-base text-body-base text-on-surface max-w-2xl text-opacity-80">
+                        Ask questions about ARGO floats, ocean temperature, salinity, and marine conditions. Access real-time data from global monitoring networks instantly.
+                    </p>
+</div>
+<!-- Stats Row (Bento Grid Style) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+<div class="bg-abyssal-navy border border-ocean-stroke rounded-lg p-4 flex flex-col gap-2 relative overflow-hidden group hover:border-[#00f5ff]/50 transition-colors">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-bright-white">sensors</span>
+</div>
+<span class="font-label-caps text-label-caps text-[#a5b4fc] uppercase">Active Floats</span>
+<span class="font-headline-md text-headline-md text-bright-white font-bold">3,842</span>
+<div class="flex items-center gap-1 text-[10px] text-[#00f5ff]">
+<span class="w-2 h-2 rounded-full bg-[#00f5ff] animate-pulse shadow-[0_0_4px_#00f5ff]"></span> Live
+                        </div>
+</div>
+<div class="bg-abyssal-navy border border-ocean-stroke rounded-lg p-4 flex flex-col gap-2 relative overflow-hidden group hover:border-[#00f5ff]/50 transition-colors">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-bright-white">dataset</span>
+</div>
+<span class="font-label-caps text-label-caps text-[#a5b4fc] uppercase">Ocean Profiles</span>
+<span class="font-headline-md text-headline-md text-bright-white font-bold">2.4M</span>
+<div class="text-[10px] text-on-surface-variant opacity-70">Updated hourly</div>
+</div>
+<div class="bg-abyssal-navy border border-ocean-stroke rounded-lg p-4 flex flex-col gap-2 relative overflow-hidden group hover:border-[#00f5ff]/50 transition-colors">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-bright-white">public</span>
+</div>
+<span class="font-label-caps text-label-caps text-[#a5b4fc] uppercase">Ocean Regions</span>
+<span class="font-headline-md text-headline-md text-bright-white font-bold">18</span>
+<div class="text-[10px] text-on-surface-variant opacity-70">Global coverage</div>
+</div>
+<div class="bg-abyssal-navy border border-ocean-stroke rounded-lg p-4 flex flex-col gap-2 relative overflow-hidden group hover:border-[#00f5ff]/50 transition-colors">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl text-bright-white">arrow_downward</span>
+</div>
+<span class="font-label-caps text-label-caps text-[#a5b4fc] uppercase">Max Depth</span>
+<span class="font-headline-md text-headline-md text-bright-white font-bold">2000m</span>
+<div class="text-[10px] text-on-surface-variant opacity-70">Standard core</div>
+</div>
+</div>
+<!-- Chat Interface -->
+<div class="bg-abyssal-navy border border-ocean-stroke rounded-xl overflow-hidden flex flex-col h-[500px] shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+<!-- Chat Header -->
+<div class="h-14 border-b border-ocean-stroke flex items-center justify-between px-6 bg-deep-marine">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#00f5ff]">forum</span>
+<span class="font-label-caps text-label-caps text-bright-white uppercase tracking-wider">Analysis Terminal</span>
+</div>
+<button class="text-on-surface-variant hover:text-[#00f5ff] transition-colors">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+</div>
+<!-- Chat History (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+<!-- Initial State / Suggestions -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+<button class="text-left p-4 rounded-lg border border-ocean-stroke bg-deep-marine hover:border-[#00f5ff]/50 hover:bg-surface-variant/30 transition-all group flex flex-col gap-2">
+<span class="material-symbols-outlined text-[#00f5ff] text-[20px] group-hover:scale-110 transition-transform">thermostat</span>
+<span class="font-body-sm text-body-sm text-on-surface">"Show temperature profiles in the Arabian Sea"</span>
+</button>
+<button class="text-left p-4 rounded-lg border border-ocean-stroke bg-deep-marine hover:border-[#00f5ff]/50 hover:bg-surface-variant/30 transition-all group flex flex-col gap-2">
+<span class="material-symbols-outlined text-[#00f5ff] text-[20px] group-hover:scale-110 transition-transform">my_location</span>
+<span class="font-body-sm text-body-sm text-on-surface">"Find active ARGO floats near India"</span>
+</button>
+</div>
+<!-- User Message -->
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-caps text-label-caps text-[#a5b4fc] uppercase">You</span>
+<span class="material-symbols-outlined text-[16px] text-[#a5b4fc]">person</span>
+</div>
+<div class="bg-surface-variant text-bright-white px-4 py-3 rounded-t-lg rounded-bl-lg max-w-[85%] font-body-base text-body-base border border-ocean-stroke">
+                                Show salinity profiles in the Arabian Sea.
+                            </div>
+</div>
+<!-- AI Response -->
+<div class="flex flex-col items-start gap-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-[16px] text-[#00f5ff]">smart_toy</span>
+<span class="font-label-caps text-label-caps text-[#00f5ff] uppercase">FloatChat</span>
+</div>
+<div class="bg-deep-marine text-on-surface px-4 py-3 rounded-t-lg rounded-br-lg max-w-[90%] md:max-w-[80%] font-body-base text-body-base border border-ocean-stroke shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+<p class="mb-3 text-bright-white">I found 32 ARGO profiles matching your request in the Arabian Sea bounding box.</p>
+<p class="mb-4 text-on-surface-variant text-sm">The selected profiles contain salinity measurements from the surface to approximately 2000 m depth. Data quality flags indicate nominal operation.</p>
+<!-- Embedded Action Cards -->
+<div class="flex flex-wrap gap-2 mt-4">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-abyssal-navy text-bright-white border border-ocean-stroke rounded hover:border-[#00f5ff] hover:text-[#00f5ff] transition-colors text-xs font-mono-data">
+<span class="material-symbols-outlined text-[14px]">map</span>
+                                        View on Map
+                                    </button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-abyssal-navy text-bright-white border border-ocean-stroke rounded hover:border-[#00f5ff] hover:text-[#00f5ff] transition-colors text-xs font-mono-data">
+<span class="material-symbols-outlined text-[14px]">analytics</span>
+                                        Open Analytics
+                                    </button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-abyssal-navy text-bright-white border border-ocean-stroke rounded hover:border-[#00f5ff] hover:text-[#00f5ff] transition-colors text-xs font-mono-data">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+                                        Explain Query
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input Area -->
+<div class="p-4 bg-deep-marine border-t border-ocean-stroke">
+<div class="relative flex items-center group">
+<input class="w-full bg-abyssal-navy border border-ocean-stroke rounded-lg pl-4 pr-12 py-3 text-bright-white font-body-base text-body-base focus:outline-none focus:border-[#00f5ff] focus:ring-1 focus:ring-[#00f5ff] transition-all placeholder-on-surface-variant/50 shadow-inner" placeholder="Ask about ARGO ocean data..." type="text"/>
+<button class="absolute right-2 p-2 text-[#a5b4fc] group-focus-within:text-[#00f5ff] hover:text-[#00f5ff] hover:bg-surface-variant rounded-md transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined hover:translate-x-0.5 transition-transform">send</span>
+</button>
+</div>
+<div class="text-center mt-2 font-mono-data text-[10px] text-[#a5b4fc] opacity-80">
+                            FloatChat may produce inaccurate information about specific sensor deployments.
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

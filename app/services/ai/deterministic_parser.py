@@ -173,6 +173,43 @@ class DeterministicParser:
 
             explanation = f"Extracted {'; '.join(parts)}." if parts else "Query parsed."
 
+        # Formulate grounded scientific answer and visualization specification
+        answer = None
+        visualization = None
+        if status == "success":
+            if effective_bbox and ("near" in text_lower or "nearest" in text_lower):
+                answer = "Identified ARGO floats matching the spatial proximity envelope. Float measurements retrieved."
+                visualization = {
+                    "type": "map",
+                    "title": "Spatial Float Search Results",
+                    "latitude_field": "latitude",
+                    "longitude_field": "longitude",
+                }
+            elif effective_float_ids:
+                answer = f"Retrieved profile measurements for float {', '.join(effective_float_ids)}."
+                visualization = {
+                    "type": "profile_chart",
+                    "title": f"Profile Measurements — Float {', '.join(effective_float_ids)}",
+                    "x_axis": effective_parameters[0] if effective_parameters else "temperature_C",
+                    "y_axis": "depth_m",
+                }
+            elif effective_parameters:
+                answer = f"Retrieved {', '.join(effective_parameters)} observations across matched ocean profiles."
+                visualization = {
+                    "type": "profile_chart",
+                    "title": f"Ocean Observations — {', '.join(effective_parameters)}",
+                    "x_axis": effective_parameters[0],
+                    "y_axis": "depth_m",
+                }
+            else:
+                answer = "Retrieved ARGO profiles matching your search criteria."
+                visualization = {
+                    "type": "map",
+                    "title": "ARGO Search Results",
+                    "latitude_field": "latitude",
+                    "longitude_field": "longitude",
+                }
+
         ai_context = {
             "received_prompt": prompt,
             "parsed_intent": {
@@ -183,6 +220,8 @@ class DeterministicParser:
                 "start_date": effective_start_date.isoformat() if effective_start_date else None,
                 "end_date": effective_end_date.isoformat() if effective_end_date else None,
             },
+            "answer": answer,
+            "visualization": visualization,
             "parser_used": "deterministic_rules",
             "status": status,
             "explanation": explanation,
@@ -276,16 +315,23 @@ class DeterministicParser:
             if region_name in text_lower:
                 return bbox
 
-        # 2. Check coordinate + radius proximity ("near 42.0 latitude and -42.0 longitude within 500 km")
+        # 2. Check coordinate + radius proximity ("near 42.0 latitude and -42.0 longitude within 500 km" or "nearest ARGO floats to 15°N, 65°E")
         coord_match = re.search(
-            r"(?:near|at|around|coordinates?)\s*(-?\d+(?:\.\d+)?)\s*(?:deg|°|degrees?)?\s*(?:lat|latitude)?,?\s*(?:and)?\s*(-?\d+(?:\.\d+)?)\s*(?:deg|°|degrees?)?\s*(?:lon|longitude)?",
+            r"(?:near|nearest|at|around|to|coordinates?)\s*(-?\d+(?:\.\d+)?)\s*(?:deg|°|degrees?)?\s*([ns]|lat|latitude)?,?\s*(?:and|to)?\s*(-?\d+(?:\.\d+)?)\s*(?:deg|°|degrees?)?\s*([ew]|lon|longitude)?",
             text_lower,
         )
 
         if coord_match:
             try:
                 lat = float(coord_match.group(1))
-                lon = float(coord_match.group(2))
+                g2 = coord_match.group(2)
+                if g2 and g2.lower() == "s":
+                    lat = -abs(lat)
+
+                lon = float(coord_match.group(3))
+                g4 = coord_match.group(4)
+                if g4 and g4.lower() == "w":
+                    lon = -abs(lon)
 
                 # Check radius
                 radius_match = re.search(

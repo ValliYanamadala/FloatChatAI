@@ -21,9 +21,12 @@ function Home() {
   ]);
 
   const handleSend = async (textToSend) => {
-    const query = (typeof textToSend === "string" ? textToSend : inputVal).trim();
+    // Extract query string whether triggered with string arg or from form event
+    const raw = typeof textToSend === "string" ? textToSend : inputVal;
+    const query = (raw || "").trim();
     if (!query || loading) return;
 
+    // Immediately display user message
     const userMsg = { sender: "YOU", text: query };
     setMessages((prev) => [...prev, userMsg]);
     setInputVal("");
@@ -70,13 +73,13 @@ function Home() {
           })
         );
       } catch {
-        // Ignore localStorage quota errors
+        // Ignore localStorage quota issues
       }
     } catch (err) {
       const errorMsg = {
         sender: "FLOATCHAT",
         text: `Error processing query: ${err.message}`,
-        detail: "Please verify backend server availability at localhost:8000.",
+        detail: "Please verify backend server availability at http://localhost:8000.",
         visualization: null,
         structuredData: null,
       };
@@ -135,6 +138,8 @@ function Home() {
 
           <div className="suggested-grid">
             <button
+              type="button"
+              id="suggested-query-nearest"
               disabled={loading}
               onClick={() => handleSend("What are the nearest ARGO floats to 15°N, 65°E?")}
             >
@@ -142,6 +147,8 @@ function Home() {
             </button>
 
             <button
+              type="button"
+              id="suggested-query-temp"
               disabled={loading}
               onClick={() => handleSend("Show temperature profiles in the Arabian Sea")}
             >
@@ -149,7 +156,7 @@ function Home() {
             </button>
           </div>
 
-          <div className="chat-area">
+          <div className="chat-area" id="chat-messages-container">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -177,22 +184,32 @@ function Home() {
             )}
           </div>
 
-          <div className="chat-input">
+          <form
+            className="chat-input"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+          >
             <input
+              id="chat-input-field"
               type="text"
               placeholder="Ask about ARGO ocean data (e.g. 'What are the nearest ARGO floats to 15°N, 65°E?')..."
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSend();
-              }}
               disabled={loading}
+              autoComplete="off"
             />
 
-            <button onClick={() => handleSend()} disabled={loading}>
+            <button
+              id="chat-submit-button"
+              type="submit"
+              disabled={loading || !inputVal.trim()}
+              aria-label="Send query"
+            >
               {loading ? "..." : "➤"}
             </button>
-          </div>
+          </form>
 
           <p className="chat-disclaimer">
             FloatChatAI generates validated spatial and oceanographic explanations backed by PostGIS.

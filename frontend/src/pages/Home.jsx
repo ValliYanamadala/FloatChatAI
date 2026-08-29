@@ -1,8 +1,11 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
+import { sendAIQuery } from "../services/api";
+import VisualizationRenderer from "../components/VisualizationRenderer";
 
 function Home() {
   const [inputVal, setInputVal] = useState("");
+  const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([
     {
       sender: "YOU",
@@ -12,37 +15,75 @@ function Home() {
       sender: "FLOATCHAT",
       text: "I found 32 ARGO profiles matching your request in the Arabian Sea bounding box.",
       detail: "The selected profiles contain salinity measurements from the surface to approximately 2000 m depth.",
+      visualization: null,
+      structuredData: null,
     },
   ]);
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const query = (typeof textToSend === "string" ? textToSend : inputVal).trim();
-    if (!query) return;
+    if (!query || loading) return;
 
     const userMsg = { sender: "YOU", text: query };
-    let aiMsg = {
-      sender: "FLOATCHAT",
-      text: `Analyzed ocean request for: "${query}".`,
-      detail: "Retrieved corresponding ARGO float profiles and sensor data.",
-    };
-
-    const lower = query.toLowerCase();
-    if (lower.includes("temperature") || lower.includes("arabian sea")) {
-      aiMsg = {
-        sender: "FLOATCHAT",
-        text: "Retrieved temperature profiles in the Arabian Sea from surface to 2000 dbar.",
-        detail: "Mean surface temperature: 27.8°C with typical tropical thermocline structure.",
-      };
-    } else if (lower.includes("india") || lower.includes("active") || lower.includes("nearest")) {
-      aiMsg = {
-        sender: "FLOATCHAT",
-        text: "Identified active ARGO profiling floats in the Northern Indian Ocean basin.",
-        detail: "Active platforms: 2901234, 2901240, 2901278 actively reporting daily cycles.",
-      };
-    }
-
-    setMessages((prev) => [...prev, userMsg, aiMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInputVal("");
+    setLoading(true);
+
+    const startTime = performance.now();
+
+    try {
+      const response = await sendAIQuery(query);
+      const latencyMs = Math.round(performance.now() - startTime);
+
+      let answerText = response.ai_context?.answer || response.ai_context?.explanation;
+      if (!answerText) {
+        if (response.total_matched > 0) {
+          answerText = `Found ${response.total_matched} matching oceanographic measurement records across ARGO profiles.`;
+        } else {
+          answerText = "No matching ARGO observations found for the specified criteria.";
+        }
+      }
+
+      const detailText = response.total_matched !== undefined
+        ? `Matched ${response.total_matched} records from PostGIS (processed in ${latencyMs} ms).`
+        : null;
+
+      const aiMsg = {
+        sender: "FLOATCHAT",
+        text: answerText,
+        detail: detailText,
+        visualization: response.ai_context?.visualization || null,
+        structuredData: response.data || [],
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
+
+      // Persist latest query trace for Query Explanation page
+      try {
+        localStorage.setItem(
+          "floatchat_latest_query_trace",
+          JSON.stringify({
+            prompt: query,
+            response,
+            latencyMs,
+            timestamp: new Date().toISOString(),
+          })
+        );
+      } catch {
+        // Ignore localStorage quota errors
+      }
+    } catch (err) {
+      const errorMsg = {
+        sender: "FLOATCHAT",
+        text: `Error processing query: ${err.message}`,
+        detail: "Please verify backend server availability at localhost:8000.",
+        visualization: null,
+        structuredData: null,
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,13 +105,13 @@ function Home() {
           <div className="stat-card">
             <span>ACTIVE FLOATS</span>
             <strong>3,842</strong>
-            <small>● Live</small>
+            <small>● Live PostGIS</small>
           </div>
 
           <div className="stat-card">
             <span>OCEAN PROFILES</span>
             <strong>2.4M</strong>
-            <small>Updated hourly</small>
+            <small>Updated real-time</small>
           </div>
 
           <div className="stat-card">
@@ -89,15 +130,22 @@ function Home() {
         <section className="analysis-terminal">
           <div className="terminal-header">
             <span>▣ ANALYSIS TERMINAL</span>
+            {loading && <span style={{ color: "#20ddd8", fontSize: "0.85rem" }}>● Processing Query...</span>}
           </div>
 
           <div className="suggested-grid">
-            <button onClick={() => handleSend("Show temperature profiles in the Arabian Sea")}>
-              Show temperature profiles in the Arabian Sea
+            <button
+              disabled={loading}
+              onClick={() => handleSend("What are the nearest ARGO floats to 15°N, 65°E?")}
+            >
+              What are the nearest ARGO floats to 15°N, 65°E?
             </button>
 
-            <button onClick={() => handleSend("Find active ARGO floats near India")}>
-              Find active ARGO floats near India
+            <button
+              disabled={loading}
+              onClick={() => handleSend("Show temperature profiles in the Arabian Sea")}
+            >
+              Show temperature profiles in the Arabian Sea
             </button>
           </div>
 
@@ -110,26 +158,44 @@ function Home() {
                 <span>{msg.sender}</span>
                 <p>{msg.text}</p>
                 {msg.detail && <small>{msg.detail}</small>}
+
+                {msg.visualization && (
+                  <VisualizationRenderer
+                    spec={msg.visualization}
+                    data={msg.structuredData}
+                    height={280}
+                  />
+                )}
               </div>
             ))}
+
+            {loading && (
+              <div className="ai-message">
+                <span>FLOATCHAT</span>
+                <p style={{ color: "#20ddd8" }}>Querying PostGIS spatial engine & AI layer...</p>
+              </div>
+            )}
           </div>
 
           <div className="chat-input">
             <input
               type="text"
-              placeholder="Ask about ARGO ocean data..."
+              placeholder="Ask about ARGO ocean data (e.g. 'What are the nearest ARGO floats to 15°N, 65°E?')..."
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSend();
               }}
+              disabled={loading}
             />
 
-            <button onClick={() => handleSend()}>➤</button>
+            <button onClick={() => handleSend()} disabled={loading}>
+              {loading ? "..." : "➤"}
+            </button>
           </div>
 
           <p className="chat-disclaimer">
-            FloatChat may produce inaccurate information about specific sensor deployments.
+            FloatChatAI generates validated spatial and oceanographic explanations backed by PostGIS.
           </p>
         </section>
       </main>

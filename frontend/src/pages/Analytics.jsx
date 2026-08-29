@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getFloats, getProfiles, getMeasurements } from "../services/api";
 import { floats as fallbackFloats } from "../data/mockData";
+import { getAnalyticsState, saveAnalyticsState } from "../utils/storage";
 import {
   LineChart,
   Line,
@@ -18,21 +19,39 @@ function Analytics() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const {
-    selectedFloats = [],
-    selectedFeatures = [],
-    selectedRegions = [],
-    depth = 2000,
-    status = "All",
-  } = location.state || {};
+  const savedAnalytics = getAnalyticsState() || {};
+  const stateData = location.state || {};
+
+  // If new navigation arrived with fresh timestamp from Explorer, use stateData; otherwise use savedAnalytics
+  const isFreshNav = stateData.timestamp && (!savedAnalytics.timestamp || stateData.timestamp > savedAnalytics.timestamp);
+
+  const initialFloatA = isFreshNav
+    ? (stateData.selectedFloats?.[0] || "ARGO_010")
+    : (savedAnalytics.floatA || stateData.selectedFloats?.[0] || "ARGO_010");
+
+  const initialFloatB = isFreshNav
+    ? (stateData.selectedFloats?.[1] || "ARGO_012")
+    : (savedAnalytics.floatB || stateData.selectedFloats?.[1] || "ARGO_012");
+
+  const initialParam = isFreshNav
+    ? (stateData.param || "Temperature (°C)")
+    : (savedAnalytics.param || stateData.param || "Temperature (°C)");
+
+  const initialDepth = isFreshNav
+    ? (stateData.depth || 2000)
+    : (savedAnalytics.selectedDepth || stateData.depth || 2000);
 
   const [availableFloats, setAvailableFloats] = useState([]);
-  const [floatA, setFloatA] = useState(selectedFloats[0] || "ARGO_001");
-  const [floatB, setFloatB] = useState(selectedFloats[1] || "ARGO_002");
-  const [param, setParam] = useState("Temperature (°C)");
-  const [selectedDepth, setSelectedDepth] = useState(depth);
-  const [timePeriod, setTimePeriod] = useState("Last 6 Months");
+  const [floatA, setFloatA] = useState(initialFloatA);
+  const [floatB, setFloatB] = useState(initialFloatB);
+  const [param, setParam] = useState(initialParam);
+  const [selectedDepth, setSelectedDepth] = useState(initialDepth);
+  const [timePeriod, setTimePeriod] = useState(savedAnalytics.timePeriod || "Last 6 Months");
   const [hasComparison, setHasComparison] = useState(true);
+
+  const selectedFeatures = stateData.selectedFeatures || savedAnalytics.selectedFeatures || ["Temp", "Salinity"];
+  const selectedRegions = stateData.selectedRegions || savedAnalytics.selectedRegions || ["Arabian Sea"];
+  const status = stateData.status || savedAnalytics.status || "All";
 
   const [chartData, setChartData] = useState([]);
   const [timeData, setTimeData] = useState([]);
@@ -46,9 +65,10 @@ function Analytics() {
       try {
         const res = await getFloats({ page: 1, page_size: 100 });
         if (res && Array.isArray(res.items) && res.items.length > 0) {
-          setAvailableFloats(res.items.map((i) => i.id));
-          if (!selectedFloats[0] && res.items[0]) setFloatA(res.items[0].id);
-          if (!selectedFloats[1] && res.items[1]) setFloatB(res.items[1].id);
+          const ids = res.items.map((i) => i.id);
+          setAvailableFloats(ids);
+          if (!floatA && ids[0]) setFloatA(ids[0]);
+          if (!floatB && ids[1]) setFloatB(ids[1]);
         } else {
           setAvailableFloats(fallbackFloats.map((f) => f.id));
         }
@@ -57,11 +77,75 @@ function Analytics() {
       }
     }
     loadFloatList();
-  }, [selectedFloats]);
+  }, []);
 
-  // 2. Fetch real comparative measurements for Float A and Float B
+  // 2. Persist analytics state to localStorage and history for page refresh persistence
   useEffect(() => {
-    if (!floatA || !floatB || floatA === floatB) return;
+    saveAnalyticsState({
+      selectedFloats: [floatA, floatB],
+      floatA,
+      floatB,
+      param,
+      selectedDepth,
+      timePeriod,
+      selectedFeatures,
+      selectedRegions,
+      status,
+      timestamp: Date.now(),
+    });
+  }, [floatA, floatB, param, selectedDepth, timePeriod, selectedFeatures, selectedRegions, status]);
+
+  const handleFloatAChange = (newA) => {
+    setFloatA(newA);
+    navigate(location.pathname, {
+      replace: true,
+      state: {
+        ...location.state,
+        selectedFloats: [newA, floatB],
+        timestamp: Date.now(),
+      },
+    });
+  };
+
+  const handleFloatBChange = (newB) => {
+    setFloatB(newB);
+    navigate(location.pathname, {
+      replace: true,
+      state: {
+        ...location.state,
+        selectedFloats: [floatA, newB],
+        timestamp: Date.now(),
+      },
+    });
+  };
+
+  const handleParamChange = (newParam) => {
+    setParam(newParam);
+    navigate(location.pathname, {
+      replace: true,
+      state: {
+        ...location.state,
+        param: newParam,
+        timestamp: Date.now(),
+      },
+    });
+  };
+
+  const handleDepthChange = (newDepth) => {
+    setSelectedDepth(newDepth);
+    navigate(location.pathname, {
+      replace: true,
+      state: {
+        ...location.state,
+        depth: newDepth,
+        timestamp: Date.now(),
+      },
+    });
+  };
+
+  // 3. Fetch real comparative measurements for Float A and Float B
+  useEffect(() => {
+    if (!floatA || !floatB) return;
 
     let isMounted = true;
     async function loadComparativeData() {
@@ -69,9 +153,8 @@ function Analytics() {
       setError(null);
 
       try {
-        // Fetch latest profile for Float A
+        // Fetch latest profiles for both floats
         const profARes = await getProfiles({ float_id: floatA, page_size: 1 }).catch(() => null);
-        // Fetch latest profile for Float B
         const profBRes = await getProfiles({ float_id: floatB, page_size: 1 }).catch(() => null);
 
         let measurementsA = [];
@@ -88,67 +171,74 @@ function Analytics() {
 
         if (!isMounted) return;
 
-        // Align measurements by depth bins
-        const depthBins = [10, 50, 100, 200, 500, 1000, 1500, 2000];
-        const aligned = depthBins.map((targetDepth) => {
-          const closestA = measurementsA.reduce((prev, curr) => {
-            const currDiff = Math.abs((curr.depth_m || 0) - targetDepth);
-            const prevDiff = prev ? Math.abs((prev.depth_m || 0) - targetDepth) : Infinity;
-            return currDiff < prevDiff ? curr : prev;
-          }, null);
+        // Collect all unique depths from both float measurements
+        const depthSet = new Set();
+        measurementsA.forEach((m) => {
+          const d = m.parameters?.depth_m ?? m.depth_m ?? m.depth_or_pressure;
+          if (typeof d === "number") depthSet.add(d);
+        });
+        measurementsB.forEach((m) => {
+          const d = m.parameters?.depth_m ?? m.depth_m ?? m.depth_or_pressure;
+          if (typeof d === "number") depthSet.add(d);
+        });
 
-          const closestB = measurementsB.reduce((prev, curr) => {
-            const currDiff = Math.abs((curr.depth_m || 0) - targetDepth);
-            const prevDiff = prev ? Math.abs((prev.depth_m || 0) - targetDepth) : Infinity;
-            return currDiff < prevDiff ? curr : prev;
-          }, null);
+        const sortedDepths = Array.from(depthSet).sort((a, b) => a - b);
 
-          const valA = param.includes("Sal")
-            ? closestA?.salinity
-            : (closestA?.temperature_C ?? closestA?.parameters?.temperature_C);
-          const valB = param.includes("Sal")
-            ? closestB?.salinity
-            : (closestB?.temperature_C ?? closestB?.parameters?.temperature_C);
+        const aligned = sortedDepths.map((depthVal) => {
+          const mA = measurementsA.find((m) => {
+            const d = m.parameters?.depth_m ?? m.depth_m ?? m.depth_or_pressure;
+            return typeof d === "number" && Math.abs(d - depthVal) < 2.0;
+          });
+          const mB = measurementsB.find((m) => {
+            const d = m.parameters?.depth_m ?? m.depth_m ?? m.depth_or_pressure;
+            return typeof d === "number" && Math.abs(d - depthVal) < 2.0;
+          });
+
+          const isSal = param.includes("Sal");
+          const valA = isSal
+            ? (mA?.parameters?.salinity ?? mA?.salinity)
+            : (mA?.parameters?.temperature_C ?? mA?.temperature_C);
+          const valB = isSal
+            ? (mB?.parameters?.salinity ?? mB?.salinity)
+            : (mB?.parameters?.temperature_C ?? mB?.temperature_C);
 
           return {
-            depth: targetDepth,
-            floatA: valA !== undefined && valA !== null ? Number(valA.toFixed(2)) : null,
-            floatB: valB !== undefined && valB !== null ? Number(valB.toFixed(2)) : null,
+            depth: Math.round(depthVal * 10) / 10,
+            floatA: valA !== undefined && valA !== null ? Number(Number(valA).toFixed(2)) : null,
+            floatB: valB !== undefined && valB !== null ? Number(Number(valB).toFixed(2)) : null,
           };
-        }).filter((d) => d.floatA !== null || d.floatB !== null);
+        }).filter((row) => (row.floatA !== null || row.floatB !== null) && row.depth <= selectedDepth);
 
         if (aligned.length > 0) {
           setChartData(aligned);
           const surfaceA = aligned[0]?.floatA;
           const surfaceB = aligned[0]?.floatB;
+          const paramUnit = param.includes("Sal") ? "PSU" : "°C";
+          const paramName = param.includes("Sal") ? "salinity" : "temperature";
+
           if (surfaceA !== null && surfaceB !== null && surfaceA !== undefined && surfaceB !== undefined) {
             const diff = (surfaceA - surfaceB).toFixed(2);
             setAiInsight(
-              `Float ${floatA} recorded ${Math.abs(diff)}° ${diff > 0 ? "warmer" : "cooler"} surface temperatures than Float ${floatB} across current profiling cycles.`
+              `Float ${floatA} recorded ${Math.abs(diff)} ${paramUnit} ${Number(diff) > 0 ? "higher" : "lower"} surface ${paramName} than Float ${floatB} across current profiling cycles.`
             );
           } else {
-            setAiInsight(`Comparing profiling observations for ${floatA} and ${floatB}.`);
+            setAiInsight(`Comparing ${paramName} observations between Float ${floatA} and Float ${floatB}.`);
           }
         } else {
-          // Fallback baseline
-          setChartData([
-            { depth: 10, floatA: 28.1, floatB: 26.8 },
-            { depth: 100, floatA: 24.5, floatB: 23.9 },
-            { depth: 500, floatA: 18.2, floatB: 17.5 },
-            { depth: 1000, floatA: 9.4, floatB: 8.8 },
-            { depth: 1500, floatA: 4.8, floatB: 4.5 },
-          ]);
-          setAiInsight(`Float ${floatA} recorded warmer surface temperatures than Float ${floatB}.`);
+          setChartData([]);
+          setAiInsight(`No profile depth measurements found matching depth range <= ${selectedDepth} m.`);
         }
 
         // Time series data
+        const baseA = measurementsA[0]?.parameters?.temperature_C ?? 27.5;
+        const baseB = measurementsB[0]?.parameters?.temperature_C ?? 26.5;
         setTimeData([
-          { month: "Mar", floatA: 27.0, floatB: 26.1 },
-          { month: "Apr", floatA: 27.5, floatB: 26.4 },
-          { month: "May", floatA: 28.1, floatB: 26.8 },
-          { month: "Jun", floatA: 27.8, floatB: 26.5 },
-          { month: "Jul", floatA: 28.3, floatB: 26.9 },
-          { month: "Aug", floatA: 27.3, floatB: 26.8 },
+          { month: "Mar", floatA: Number((baseA - 0.8).toFixed(1)), floatB: Number((baseB - 0.7).toFixed(1)) },
+          { month: "Apr", floatA: Number((baseA - 0.4).toFixed(1)), floatB: Number((baseB - 0.3).toFixed(1)) },
+          { month: "May", floatA: Number((baseA + 0.3).toFixed(1)), floatB: Number((baseB + 0.2).toFixed(1)) },
+          { month: "Jun", floatA: Number((baseA + 0.1).toFixed(1)), floatB: Number((baseB + 0.0).toFixed(1)) },
+          { month: "Jul", floatA: Number((baseA + 0.5).toFixed(1)), floatB: Number((baseB + 0.4).toFixed(1)) },
+          { month: "Aug", floatA: Number(baseA.toFixed(1)), floatB: Number(baseB.toFixed(1)) },
         ]);
       } catch (err) {
         if (isMounted) setError(`Failed to fetch comparative data: ${err.message}`);
@@ -161,7 +251,7 @@ function Analytics() {
     return () => {
       isMounted = false;
     };
-  }, [floatA, floatB, param]);
+  }, [floatA, floatB, param, selectedDepth]);
 
   const handleCompare = () => {
     if (floatA && floatB) {
@@ -189,12 +279,12 @@ function Analytics() {
         <section className="analytics-summary">
           <div className="summary-card">
             <span>FLOAT A</span>
-            <strong>{floatA || "Not selected"}</strong>
+            <strong id="analytics-float-a-label">{floatA || "Not selected"}</strong>
           </div>
 
           <div className="summary-card">
             <span>FLOAT B</span>
-            <strong>{floatB || "Not selected"}</strong>
+            <strong id="analytics-float-b-label">{floatB || "Not selected"}</strong>
           </div>
 
           <div className="summary-card">
@@ -230,18 +320,26 @@ function Analytics() {
 
         <section className="analytics-controls">
           <div className="control-group">
-            <label>PARAMETER</label>
+            <label htmlFor="select-parameter">PARAMETER</label>
 
-            <select value={param} onChange={(e) => setParam(e.target.value)}>
+            <select
+              id="select-parameter"
+              value={param}
+              onChange={(e) => handleParamChange(e.target.value)}
+            >
               <option>Temperature (°C)</option>
               <option>Salinity (PSU)</option>
             </select>
           </div>
 
           <div className="control-group">
-            <label>FLOAT A</label>
+            <label htmlFor="select-float-a">FLOAT A</label>
 
-            <select value={floatA} onChange={(e) => setFloatA(e.target.value)}>
+            <select
+              id="select-float-a"
+              value={floatA}
+              onChange={(e) => handleFloatAChange(e.target.value)}
+            >
               {availableFloats.map((id) => (
                 <option key={id} value={id}>
                   {id}
@@ -251,9 +349,13 @@ function Analytics() {
           </div>
 
           <div className="control-group">
-            <label>FLOAT B</label>
+            <label htmlFor="select-float-b">FLOAT B</label>
 
-            <select value={floatB} onChange={(e) => setFloatB(e.target.value)}>
+            <select
+              id="select-float-b"
+              value={floatB}
+              onChange={(e) => handleFloatBChange(e.target.value)}
+            >
               {availableFloats.map((id) => (
                 <option key={id} value={id}>
                   {id}
@@ -263,9 +365,13 @@ function Analytics() {
           </div>
 
           <div className="control-group">
-            <label>TIME PERIOD</label>
+            <label htmlFor="select-time-period">TIME PERIOD</label>
 
-            <select value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)}>
+            <select
+              id="select-time-period"
+              value={timePeriod}
+              onChange={(e) => setTimePeriod(e.target.value)}
+            >
               <option>Last 6 Months</option>
               <option>Last 3 Months</option>
               <option>Last 1 Year</option>
@@ -274,9 +380,13 @@ function Analytics() {
           </div>
 
           <div className="control-group">
-            <label>DEPTH RANGE</label>
+            <label htmlFor="select-depth-range">DEPTH RANGE</label>
 
-            <select value={selectedDepth} onChange={(e) => setSelectedDepth(Number(e.target.value))}>
+            <select
+              id="select-depth-range"
+              value={selectedDepth}
+              onChange={(e) => handleDepthChange(Number(e.target.value))}
+            >
               <option value="500">0 - 500 m</option>
               <option value="1000">0 - 1000 m</option>
               <option value="1500">0 - 1500 m</option>
@@ -284,7 +394,11 @@ function Analytics() {
             </select>
           </div>
 
-          <button className="compare-control-btn" onClick={handleCompare}>
+          <button
+            id="apply-compare-btn"
+            className="compare-control-btn"
+            onClick={handleCompare}
+          >
             Compare
           </button>
         </section>
@@ -298,74 +412,82 @@ function Analytics() {
             <div className="chart-card">
               <h3>{param} vs Depth</h3>
 
-              <ResponsiveContainer width="100%" height={380}>
-                <LineChart
-                  data={chartData}
-                  layout="vertical"
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 20,
-                  }}
-                >
-                  <CartesianGrid
-                    stroke="#173149"
-                    strokeDasharray="3 3"
-                  />
-
-                  <XAxis
-                    type="number"
-                    stroke="#9fb3c1"
-                    label={{
-                      value: param,
-                      position: "insideBottom",
-                      offset: -10,
+              {chartData.length === 0 ? (
+                <p style={{ color: "#9fb3c1", padding: "2rem", textAlign: "center" }}>
+                  No measurement data found for the selected depth range.
+                </p>
+              ) : (
+                <ResponsiveContainer width="100%" height={380}>
+                  <LineChart
+                    data={chartData}
+                    layout="vertical"
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 20,
                     }}
-                  />
+                  >
+                    <CartesianGrid
+                      stroke="#173149"
+                      strokeDasharray="3 3"
+                    />
 
-                  <YAxis
-                    dataKey="depth"
-                    type="number"
-                    reversed
-                    domain={[0, selectedDepth]}
-                    stroke="#9fb3c1"
-                    label={{
-                      value: "Depth (m)",
-                      angle: -90,
-                      position: "insideLeft",
-                    }}
-                  />
+                    <XAxis
+                      type="number"
+                      stroke="#9fb3c1"
+                      label={{
+                        value: param,
+                        position: "insideBottom",
+                        offset: -10,
+                      }}
+                    />
 
-                  <Tooltip />
-                  <Legend />
+                    <YAxis
+                      dataKey="depth"
+                      type="number"
+                      reversed
+                      domain={[0, selectedDepth]}
+                      stroke="#9fb3c1"
+                      label={{
+                        value: "Depth (m)",
+                        angle: -90,
+                        position: "insideLeft",
+                      }}
+                    />
 
-                  <Line
-                    type="monotone"
-                    dataKey="floatA"
-                    name={`Float ${floatA}`}
-                    stroke="#20ddd8"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                  />
+                    <Tooltip />
+                    <Legend />
 
-                  <Line
-                    type="monotone"
-                    dataKey="floatB"
-                    name={`Float ${floatB}`}
-                    stroke="#9fb7ff"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+                    <Line
+                      type="monotone"
+                      dataKey="floatA"
+                      name={`Float ${floatA}`}
+                      stroke="#20ddd8"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+
+                    <Line
+                      type="monotone"
+                      dataKey="floatB"
+                      name={`Float ${floatB}`}
+                      stroke="#9fb7ff"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
 
             <div className="analytics-right">
               <div className="ai-insight-card">
                 <span>AI INSIGHT</span>
 
-                <p>{aiInsight || `Comparative analysis for Float ${floatA} and Float ${floatB}.`}</p>
+                <p id="analytics-ai-insight-text">
+                  {aiInsight || `Comparative analysis for Float ${floatA} and Float ${floatB}.`}
+                </p>
               </div>
 
               <div className="chart-card">

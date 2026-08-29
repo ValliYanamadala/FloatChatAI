@@ -186,6 +186,7 @@ function Explorer() {
         selectedRegions,
         depth,
         status,
+        timestamp: Date.now(),
       },
     });
   };

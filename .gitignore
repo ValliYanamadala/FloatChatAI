@@ -1,47 +1,59 @@
+# Secrets and environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environment
-.venv/
-env/
-venv/
-ENV/
-
-# Environment Variables
-.env
-.env.local
-
-# Testing & Coverage
+*.pyo
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Node & Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.next/
+.vite/
+coverage/
 
 # IDE & OS
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 .DS_Store
 Thumbs.db
 
-# Database / PostGIS local data
+# Docker & Database Local Storage
+docker/.data/
 pgdata/
+.chroma/
+.chroma*/
+*.log
+
+# Generated datasets and local cache artifacts
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+*.nc
+*.netcdf
+*.parquet
+*.feather
+*.h5
+*.hdf5

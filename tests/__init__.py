@@ -1,1 +1,1 @@
-"""Test suite for ARGO Oceanographic Float Backend."""
+"""Test suite for FloatChatAI — ARGO Oceanographic Float Intelligence System."""

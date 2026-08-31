@@ -147,3 +147,12 @@ python3 -m unittest discover -s tests
 # Verify compilation
 python3 -m compileall ai app mcp tests
 ```
+
+---
+
+## 🏆 GitHub Achievement
+
+**YOLO** — You want it? You merge it.
+
+This achievement was earned by merging a pull request without a review. It is shown as a GitHub profile badge.
+

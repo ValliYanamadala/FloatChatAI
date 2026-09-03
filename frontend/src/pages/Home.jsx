@@ -6,19 +6,7 @@ import VisualizationRenderer from "../components/VisualizationRenderer";
 function Home() {
   const [inputVal, setInputVal] = useState("");
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      sender: "YOU",
-      text: "Show salinity profiles in the Arabian Sea.",
-    },
-    {
-      sender: "FLOATCHAT",
-      text: "I found 32 ARGO profiles matching your request in the Arabian Sea bounding box.",
-      detail: "The selected profiles contain salinity measurements from the surface to approximately 2000 m depth.",
-      visualization: null,
-      structuredData: null,
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const handleSend = async (textToSend) => {
     // Extract query string whether triggered with string arg or from form event
